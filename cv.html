@@ -1,17 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-	<link rel="stylesheet" href="bootstrap.min.css">
 	<link rel="stylesheet" href="cv.css">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 	<title> My CV</title>
 </head>
 <body>
-	<div class="container-fluid">
 
 		<header>
 			<h1> Mon CV </h1>
@@ -46,15 +40,15 @@
 
 		<div id = "experiences" class="blockextended">
 			<div class="title"> Experiences </div>
-			<div class="exp-item">
-				<div class="exp-firm"> SYNOPSYS </div>
-				<div class="exp-role"> R &amp; D Engineer </div>
-				<div class="exp-place"> France </div>				
-				<div class="exp-period">
-					<div class="from"> Sep 2018 </div>
-					<div class="from"> Jan 2019 </div>
+			<div class="item">
+				<div class="item-company"> Company Name </div>
+				<div class="item-role"> R &amp; D Engineer </div>
+				<div class="item-place"> France </div>
+				<div class="item-period">
+					<div class="item-period-from"> Sep 2018 </div>
+					<div class="item-period-to"> Jan 2019 </div>
 				</div>
-				<div class="exp-description">
+				<div class="description">
 					<div class="exp-item"> Debugged codes</div>
 					<div class="exp-item"> Developped scripts</div>
 				</div>
@@ -73,15 +67,72 @@
 			</div>			
 		</div>
 		
-		<footer>
-			<div class="footer-copyright py-3 text-right">
-				<small>Copyright © 2019, Minh Khoa Nguyen. All rights reserved.</small>
-			</div>
-		</footer>
+	<h1>Draggable DIV Element</h1>
+
+	<p>Click and hold the mouse button down while moving the DIV element</p>
+
+	<div id="mydiv">
+		<div id="mydivheader">Click here to move</div>
+		<p>Move</p>
+		<p>this</p>
+		<p>DIV</p>
 	</div>
 
-	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	
+	<script>
+	//Make the DIV element draggagle:
+	//dragElement(document.getElementById("mydivheader"));
+	dragElement(document.getElementsByTagName("DIV"));
+
+	function dragElement(elmnt) {
+		var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+		var i;
+		for (i = 0; i < elmnt.length; i++) { 
+			elmnt[i].onmousedown = dragMouseDown;
+		}
+
+		//elmnt.onmousedown = dragMouseDown;
+		/*
+		if (document.getElementById(elmnt.id + "header")) {
+			// if present, the header is where you move the DIV from:
+			document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+		} else {
+			// otherwise, move the DIV from anywhere inside the DIV:
+			elmnt.onmousedown = dragMouseDown;
+		}
+		*/
+		
+		function dragMouseDown(e) {
+			e = e || window.event;
+			e.preventDefault();
+			// get the mouse cursor position at startup:
+			pos3 = e.clientX;
+			pos4 = e.clientY;
+			document.onmouseup = closeDragElement;
+			// call a function whenever the cursor moves:
+			document.onmousemove = elementDrag;
+		}
+
+		function elementDrag(e) {
+			e = e || window.event;
+			e.preventDefault();
+			// calculate the new cursor position:
+			pos1 = pos3 - e.clientX;
+			pos2 = pos4 - e.clientY;
+			pos3 = e.clientX;
+			pos4 = e.clientY;
+			// set the element's new position:
+			elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+			elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+		}
+
+		function closeDragElement() {
+			/* stop moving when mouse button is released:*/
+			document.onmouseup = null;
+			document.onmousemove = null;
+		}
+	}
+	</script>
+
 </body>
 </html>
