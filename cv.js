@@ -4,8 +4,6 @@ function exchangeElements(element1, element2) {
 	
 	if (element1 == null || element2 == null) return element1;
 	if (element1 == element2) return element1;
-	console.log('elm1', element1);
-	console.log('elm2', element2);
 	
 	if (element1.parentNode == element2.parentNode && element1.parentNode != null && element2.parentNode != null) {
 		var clonedElement1 = element1.cloneNode(true);
@@ -38,15 +36,15 @@ function dragElement(elmnt) {
     e.preventDefault();
 		
     // get element at the mouse cursor
-    var elm = document.elementFromPoint(e.clientX, e.clientY);
-		
-		elmnt = exchangeElements(elmnt, elm);		
+    var elm = document.elementFromPoint(e.clientX, e.clientY);		
+		elmnt = exchangeElements(elmnt, elm);	
   }
 
   function closeDragElement() {
     /* stop moving when mouse button is released:*/
     document.onmouseup = null;
     document.onmousemove = null;
+		elmnt.onmousedown = dragMouseDown;
   }
 
 
