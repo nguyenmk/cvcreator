@@ -3,8 +3,11 @@
 function exchangeElements(element1, element2) {
 	
 	if (element1 == null || element2 == null) return element1;
+	if (element1 == element2) return element1;
+	console.log('elm1', element1);
+	console.log('elm2', element2);
 	
-	if (element1.parentNode == element2.parentNode) {
+	if (element1.parentNode == element2.parentNode && element1.parentNode != null && element2.parentNode != null) {
 		var clonedElement1 = element1.cloneNode(true);
 		var clonedElement2 = element2.cloneNode(true);
 		element2.parentNode.replaceChild(clonedElement1, element2);
