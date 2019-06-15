@@ -97,71 +97,23 @@ function integrateClone(clone, element, nodeAddType) {
 }
 
 function insertElement(inserted, element, region) {
-	if (region == Region.LEFT) {
-		if (isRowItem(element)) {
-			let clone = createClone(inserted, element, ContainerType.None);
-			let new_element = integrateClone(clone, element, NodeAddType.Insert);
-			removeElement(inserted);
-			return new_element;
-		} else {
-			//wrap around by a container
-			let clone = createClone(inserted, element, ContainerType.Row);
-			// integrate clone and clean
-			let new_element = integrateClone(clone, element, NodeAddType.Replace);
-			// remove the inserted
-			removeElement(inserted);
+	let containerType = ConTainerType.None;
+	let nodeAddType = NodeAddType.Insert;
 
-			return new_element;
-		}
-	} else if (region == Region.RIGHT) {
-		if (isRowItem(element)) {
-			let clone = createClone(inserted, element, ContainerType.None);
-			let new_element = integrateClone(clone, element, NodeAddType.Append);
-			removeElement(inserted);
-			return new_element;
-		} else {
-			//wrap around by a container
-			let clone = createClone(inserted, element, ContainerType.Row);
-			// integrate clone and clean
-			let new_element = integrateClone(clone, element, NodeAddType.Replace);
-			// remove the inserted
-			removeElement(inserted);
-
-			return new_element;
-		}
-	} else if (region == Region.TOP) {
-		if (isColItem(element)) {
-			let cloned = createClone(inserted, element, ContainerType.None);
-			let new_element = integrateClone(clone, element, NodeAddType.Insert);
-			removeElement(inserted);
-			return new_element;
-		} else {
-			//wrap around by a container
-			let clone = createClone(inserted, element, ContainerType.Container);
-			// integrate clone and clean
-			let new_element = integrateClone(clone, element, NodeAddType.Replace);
-			// remove the inserted
-			removeElement(inserted);
-
-			return new_element;
-		}
-	} else if (region == Region.BOTTOM) {
-		if (isColItem(element)) {
-			let clone = inserted.cloneNode(true);
-			let new_element = element.parentNode.append(clone, element);
-			removeElement(inserted);
-			return new_element;
-		} else {
-			//wrap around by a container
-			let clone = createClone(inserted, element, ContainerType.Container);
-			// integrate clone and clean
-			let new_element = integrateClone(clone, element, NodeAddType.Append);
-			// remove the inserted
-			removeElement(inserted);
-
-			return new_element;
-		}
+	if ((region == Region.LEFT || region == Region.RIGHT)  && isColItem(element) ) {
+		containerType = ContainerType.Row;
+		nodeAddType = NodeAddType.Replace;
+	} else if ((region == Region.TOP || region == Region.BOTTOM)  && isRowItem(element) ) {
+		containerType = ContainerType.Container;
+		nodeAddType = NodeAddType.Replace;
+	} else if ((region == Region.RIGHT && isRowItem(element)) || (region == Region.BOTTOM && isColItem(element))) {
+		nodeAddType = NodeAddType.Append;
 	}
+
+	let clone = createClone(inserted, element, containerType);
+	let new_element = integrateClone(clone, element, nodeAddType);
+	removeElement(inserted);
+	return new_element;
 }
 
 function handleDragStart(ev) {
