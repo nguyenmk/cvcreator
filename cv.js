@@ -50,12 +50,16 @@ function exchangeElements(element1, element2) {
 	else return [element1, element2];
 }
 
-function isColItem(element) {
+function isRow(element) {
 	return element && element.classList && element.classList.contains("row");
 }
 
-function isRowItem(element) {
+function isContainer(element) {
 	return element && element.classList && (element.classList.contains("container") || element.classList.contains("container-fluid"));
+}
+
+function isCol(element) {
+	return element && element.parentNode && isRow(element.parentNode);
 }
 
 const ContainerType = { Container: "container", Row: "row", None: "none"};
@@ -96,24 +100,136 @@ function integrateClone(clone, element, nodeAddType) {
 	else element.parentNode.append(clone, element);
 }
 
-function insertElement(inserted, element, region) {
-	let containerType = ConTainerType.None;
-	let nodeAddType = NodeAddType.Insert;
+function createNode(tagName, className) {
+    let node = document.createNode(tagName);
+    node.className = className;
+    return node;
+}
 
-	if ((region == Region.LEFT || region == Region.RIGHT)  && isColItem(element) ) {
-		containerType = ContainerType.Row;
-		nodeAddType = NodeAddType.Replace;
-	} else if ((region == Region.TOP || region == Region.BOTTOM)  && isRowItem(element) ) {
-		containerType = ContainerType.Container;
-		nodeAddType = NodeAddType.Replace;
-	} else if ((region == Region.RIGHT && isRowItem(element)) || (region == Region.BOTTOM && isColItem(element))) {
-		nodeAddType = NodeAddType.Append;
-	}
+function createWrapper(insrt, elm, region) {
+    if (isCol(elm)){
+        if (isCol(insrt)) {
+            if (region == Region.LEFT || region == Region.RIGHT) {
+                if (region == Region.LEFT)
+                    return [elm.nodeClone(true), insert.nodeClone(true)];
+                else 
+                    return [insert.nodeClone(true), elm.nodeClone(true)];
+            } else {
+                let c = createNode("DIV", "col");
+                let container = createNode("DIV", "container");
+                let row1 = createNode("DIV", "row");
+                let row2 = createNode("DIV", "row");
+                if (region == Region.TOP) {
+                    row1.appendChild(insrt.nodeClone(true));
+                    row2.appendChild(elm.nodeClone(true));
+                } else {
+                    row1.appendChild(elm.nodeClone(true));
+                    row2.appendChild(insrt.nodeClone(true));
+                }
+                c.appendChild(container);
+                container.appendChild(row1);
+                container.appendChild(row2);
+                return [c];
+            }
+        } else if (isRow(insrt)) {
+            if (region == Region.LEFT || region == Region.RIGHT) {
+                let c = createNode("DIV", "col");
+                let container = createNode("DIV", "container");
+                c.appendChild(container);
+                container.appendChild(insrt.cloneNode(true));
+                if (region == Region.LEFT) 
+                    return [elm.nodeClone(true), c];
+                else 
+                    return [c, elm.nodeClone(true)];
+            } else {
+                let c = createNode("DIV", "col");
+                let container = createNode("DIV", "container");
+                let row = createNode("DIV", "row");
+                row.appendChild(elm.nodeClone(true));
+                if (region == Region.TOP) {
+                    container.appendChild(insrt.nodeClone(true));
+                    container.appendChild(elm.nodeClone(true));
+                } else {
+                    container.appendChild(elm.nodeClone(true));
+                    container.appendChild(insrt.nodeClone(true));
+                }
+                c.appendChild(container);
+                return [c];
+            }
+        }
+    } else if (isRow(elm)) {
+        if (isCol(insrt)) {
+            if (region == Region.LEFT || region == Region.RIGHT) {
+                let r = createNode("DIV", "row");
+                let c = createNode("DIV", "col");
+                let container = createNode("DIV", "container");
+                c.appendChild(container);
+                container.appendChild(elm.cloneNode(true));
+                if (region == Region.LEFT) {
+                    r.appendChild(insrt.cloneNode(true));
+                    r.appendChild(elm.cloneNode(true));
+                } else { 
+                    r.appendChild(elm.cloneNode(true));
+                    r.appendChild(insrt.cloneNode(true));
+                }
+                return [r];
+            } else {
+                let r = createNode("DIV", "row");
+                r.appendChild(insrt.cloneNode(true));
+                if (region == Region.TOP) {
+                    return [r, elm.cloneNode(true)];
+                } else { 
+                    return [elm.cloneNode(true), r];
+                }
+            }
+        } else if (isRow(insrt)) {
+            if (region == Region.LEFT || region == Region.RIGHT) {
+                let container1 = createNode("DIV", "container");
+                let container2 = createNode("DIV", "container");
+                let c1 = createNode("DIV", "col");
+                let c2 = createNode("DIV", "col");
+                let r = createNode("DIV", "row");
+                r.appendChild(c1);
+                r.appendChild(c2);
+                c1.appendChild(container1);
+                c2.appendChild(container2);
+                container1.appendChild(insrt.cloneNode(true));
+                container2.appendChild(elm.cloneNode(true));
+                
+                if (region == Region.LEFT) {
+                    r.appendChild(insrt.cloneNode(true));
+                    r.appendChild(elm.cloneNode(true));
+                } else { 
+                    r.appendChild(elm.cloneNode(true));
+                    r.appendChild(insrt.cloneNode(true));
+                }
+                return [r];
+            } else {
+                if (region == Region.TOP) {
+                    return [elm.cloneNode(true), insrt.cloneNode(true)];
+                } else { 
+                    return [insrt.cloneNode(true), elm.cloneNode(true)];
+                }
+            }
+        }
+    }
+}
 
-	let clone = createClone(inserted, element, containerType);
-	let new_element = integrateClone(clone, element, nodeAddType);
-	removeElement(inserted);
-	return new_element;
+function insertElement(inserted, elm, region) {
+    if (isCol(elm)) {
+        if (region == Region.LEFT) {
+            // create clone
+            let clone = createWrapper(inserted, elm, region); // create clone
+            let new_elm = integrateClone(clone, elm); // insert
+            erase(inserted);
+        } else if (region == Region.RIGHT) {
+
+        } else if (region == Region.TOP) {
+
+        } else if (region == Region.BOTTOM) {
+
+        }
+    }
 }
 
 function handleDragStart(ev) {

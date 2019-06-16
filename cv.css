@@ -1,3 +1,6 @@
+div {
+    border-style: solid;
+}
 #mydiv {
   z-index: 9;
   background-color: #f1f1f1;
