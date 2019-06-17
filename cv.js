@@ -106,110 +106,111 @@ function createNode(tagName, className) {
     return node;
 }
 
+const GridType = { Row: "row", Col: "col" };
+
+function createElement(elm, srcType, targetType, promoted = false) {
+    if (srcType == GridType.Row) {           
+        if (targetType == GridType.Row) {
+            if (elm.length > 1) {
+                if (promoted === false) {
+                    let row = [];
+                    for (el of elm) row.appendChild(el.nodeClone(true));
+                    return row;
+                } else {
+                    let col = [];
+                    for (el of elm) {
+                        col.appendChild(createElement(elm, GridType.Row, GridType.Col));
+                    }
+                    return createElement(col, GridType.Col, GridType.Row);
+                }
+            }
+            else return elm;
+        } else if (targetType == GridType.Col) {
+            if (elm.length == 1) {
+                let container = createNode("DIV", "container");            
+                container.appendChild(elm.cloneNode(true));
+                let col = createNode("DIV", "col");            
+                col.appendChild(container);
+                return col;
+            } else {
+                let container = createNode("DIV", "container");
+                for (el of elm) {
+                    container.appendChild(el.nodeClone(true));
+                }
+                let c = createNode("DIV", "col");
+                c.appendChild(container);
+                return c;
+            }
+        }
+    } else if (srcType == GridType.Col) {
+        if (targetType == GridType.Row) {
+            if (elm.length == 1) {            
+                let row = createNode("DIV", "row");
+                row.appendChild(elm.cloneNode(true));
+                return row;
+            } else {
+                let r = createNode("DIV", "row");
+                for (el of elm) {
+                    r.appendChild(el.nodeClone(true));
+                }
+                return r;
+            }
+        } else if (targetType == GridType.Col) {
+            if (elm.length > 1) {
+                if (promoted === false) {
+                    let col = [];
+                    for (el of elm) col.appendChild(el.nodeClone(true));
+                    return col;
+                } else {
+                    let row = [];
+                    for (el of elm) {
+                        row.appendChild(createElement(elm, GridType.Col, GridType.Row));
+                    }
+                    return createElement(col, GridType.Col, GridType.Row);
+                }
+            } else return elm;
+        }
+    }
+}
 function createWrapper(insrt, elm, region) {
     if (isCol(elm)){
         if (isCol(insrt)) {
             if (region == Region.LEFT || region == Region.RIGHT) {
-                if (region == Region.LEFT)
-                    return [elm.nodeClone(true), insert.nodeClone(true)];
-                else 
-                    return [insert.nodeClone(true), elm.nodeClone(true)];
+                if (region == Region.LEFT) return createElement([elm, insrt], GridType.Col, GridType.Col, false);
+                else return createElement([insrt, elm],  GridType.Col, GridType.Col, false);
             } else {
-                let c = createNode("DIV", "col");
-                let container = createNode("DIV", "container");
-                let row1 = createNode("DIV", "row");
-                let row2 = createNode("DIV", "row");
-                if (region == Region.TOP) {
-                    row1.appendChild(insrt.nodeClone(true));
-                    row2.appendChild(elm.nodeClone(true));
-                } else {
-                    row1.appendChild(elm.nodeClone(true));
-                    row2.appendChild(insrt.nodeClone(true));
-                }
-                c.appendChild(container);
-                container.appendChild(row1);
-                container.appendChild(row2);
-                return [c];
+                if (region == Region.TOP) return createElement([insrt, elm], GridType.Col, GridType.Col, true);
+                else return createElement([elm, insrt], GridType.Col, GridType.Col, true);
             }
         } else if (isRow(insrt)) {
             if (region == Region.LEFT || region == Region.RIGHT) {
-                let c = createNode("DIV", "col");
-                let container = createNode("DIV", "container");
-                c.appendChild(container);
-                container.appendChild(insrt.cloneNode(true));
-                if (region == Region.LEFT) 
-                    return [elm.nodeClone(true), c];
-                else 
-                    return [c, elm.nodeClone(true)];
+                let col = createElement(insrt, GridType.Col); // convert insrt from row to col
+                if (region == Region.LEFT) return createElement([elm, col], GridType.Col, GridType.Col, false);
+                else return createElement([col, elm], GridType.Col, GridType.Col, false);                
             } else {
-                let c = createNode("DIV", "col");
-                let container = createNode("DIV", "container");
-                let row = createNode("DIV", "row");
-                row.appendChild(elm.nodeClone(true));
-                if (region == Region.TOP) {
-                    container.appendChild(insrt.nodeClone(true));
-                    container.appendChild(elm.nodeClone(true));
-                } else {
-                    container.appendChild(elm.nodeClone(true));
-                    container.appendChild(insrt.nodeClone(true));
-                }
-                c.appendChild(container);
-                return [c];
+                let row = createElement(elm, GridType.Row); //convert elm from col to row
+                if (region == Region.TOP) return createElement([insrt, row], GridType.Row, GridType.Col);
+                else return createElement([row, insrt], GridType.Row, GridType.Col);
             }
         }
     } else if (isRow(elm)) {
         if (isCol(insrt)) {
-            if (region == Region.LEFT || region == Region.RIGHT) {
-                let r = createNode("DIV", "row");
-                let c = createNode("DIV", "col");
-                let container = createNode("DIV", "container");
-                c.appendChild(container);
-                container.appendChild(elm.cloneNode(true));
-                if (region == Region.LEFT) {
-                    r.appendChild(insrt.cloneNode(true));
-                    r.appendChild(elm.cloneNode(true));
-                } else { 
-                    r.appendChild(elm.cloneNode(true));
-                    r.appendChild(insrt.cloneNode(true));
-                }
-                return [r];
+            if (region == Region.LEFT || region == Region.RIGHT) {                
+                let col = createElement(elm, GridType.Col); //convert elm from row to col
+                if (region == Region.LEFT) return createElement([insrt, col], GridType.Col, GridType.Row);
+                else return createElement([col, insrt], GridType.Col, GridType.Row);
             } else {
-                let r = createNode("DIV", "row");
-                r.appendChild(insrt.cloneNode(true));
-                if (region == Region.TOP) {
-                    return [r, elm.cloneNode(true)];
-                } else { 
-                    return [elm.cloneNode(true), r];
-                }
+                let row = createElement(insrt, GridType.Row); //convert insrt from col to row
+                if (region == Region.TOP) return createElement([row, elm], GridType.Row, GridType.Row, false);
+                return createElement([elm, row], GridType.Row, GridType.Row, false);
             }
         } else if (isRow(insrt)) {
             if (region == Region.LEFT || region == Region.RIGHT) {
-                let container1 = createNode("DIV", "container");
-                let container2 = createNode("DIV", "container");
-                let c1 = createNode("DIV", "col");
-                let c2 = createNode("DIV", "col");
-                let r = createNode("DIV", "row");
-                r.appendChild(c1);
-                r.appendChild(c2);
-                c1.appendChild(container1);
-                c2.appendChild(container2);
-                container1.appendChild(insrt.cloneNode(true));
-                container2.appendChild(elm.cloneNode(true));
-                
-                if (region == Region.LEFT) {
-                    r.appendChild(insrt.cloneNode(true));
-                    r.appendChild(elm.cloneNode(true));
-                } else { 
-                    r.appendChild(elm.cloneNode(true));
-                    r.appendChild(insrt.cloneNode(true));
-                }
-                return [r];
+                if (region == Region.LEFT) return createElement([insrt, elm], GridType.Row, GridType.Row, true);
+                else return createElement([elm, insrt], GridType.Row, GridType.Row, true);                
             } else {
-                if (region == Region.TOP) {
-                    return [elm.cloneNode(true), insrt.cloneNode(true)];
-                } else { 
-                    return [insrt.cloneNode(true), elm.cloneNode(true)];
-                }
+                if (region == Region.TOP) return createElement([elm, insrt], GridType.Row);
+                else return createElement([insrt, elm], GridType.Row);
             }
         }
     }
