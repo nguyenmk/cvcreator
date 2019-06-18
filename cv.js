@@ -3,7 +3,13 @@
 //document.getElementById("mydivheader").ondragstart = handleDragStart;
 //document.getElementById("Move").ondragover = handleDragOver;
 
-const Region = { TOP: "top", BOTTOM: "bottom", LEFT: "left", RIGHT: "right"}
+
+const GridType = { Row: "row", Col:"col", None: "none"};
+
+const Region = { LEFT: -2, RIGHT: -1, BOTTOM: 2, TOP: 1}
+
+function isLeftRight(region) { return region < 0; }
+function isLeftBottom(region) { return Math.abs(region) == 2; }
 
 function getRegion(box, x, y) {
 	if (box.width > box.height) {
@@ -12,7 +18,7 @@ function getRegion(box, x, y) {
 		let h_mi = box.height / 2;
 		if (x < box.left + w_lo) return Region.LEFT;
 		else if (x > box.left + w_hi) return Region.RIGHT;
-		else if (h_mi < box.top + h_mi) return Region.TOP;
+		else if (y < box.top + h_mi) return Region.TOP;
 		else return Region.BOTTOM;
 	} else {
 		let h_lo = box.height / 6;
@@ -27,9 +33,14 @@ function getRegion(box, x, y) {
 
 let div_elements = document.getElementsByTagName("DIV");
 for (var i = 0; i < div_elements.length; ++i) {
-	div_elements.ondragstart = handleDragStart;
-	div_elements.ondragover = handleDragOver;
-	div_elements.ondop = handleDrop;
+    let elm = div_elements[i];
+    let gridType = getGridType(elm);
+    if ( gridType == GridType.Row || gridType == GridType.Col) {
+        console.log(elm);
+        elm.draggable = true;
+        elm.ondragstart = handleDragStart;
+        elm.ondragover = handleDragOver;
+    }
 }
 
 let dragged_item = null;
@@ -50,216 +61,156 @@ function exchangeElements(element1, element2) {
 	else return [element1, element2];
 }
 
-function isRow(element) {
-	return element && element.classList && element.classList.contains("row");
-}
-
-function isContainer(element) {
-	return element && element.classList && (element.classList.contains("container") || element.classList.contains("container-fluid"));
-}
-
-function isCol(element) {
-	return element && element.parentNode && isRow(element.parentNode);
-}
-
-const ContainerType = { Container: "container", Row: "row", None: "none"};
-
-function createClone(element, otherElement, containerType) {
-	if (containerType == ContainerType.None) {
-		return inserted.cloneNode(true);
-	} else {
-		let clone = document.createNode("DIV");
-		if (containerType == ContainerType.Container) clone.class = "container";
-		else clone.class = "row";
-		clone.appendChild(element.cloneNode(true));
-		clone.appendChild(otherElement.cloneNode(true));
-		return cloned;
-	}
-}
-
-function removeElement(element) {
-	if (element.parentNode) {
-		if (element.parentNode.childNodes.length == 2 && element.parentNode.parentNode) {
-			// unwrap
-			let otherNode = element.parentNode.childNodes[0];
-			if (otherNode == element) otherNode = element.parentNode.childNodes[1];
-			let clone = otherNode.cloneNode(true);
-			element.parentNode.parentNode.replace(clone, element.parentNode);
-		}
-		else {
-			element.parentNode.removeChild(element);
-		}
-	}
-}
-
-const NodeAddType = { Insert: "insertBefore", Replace: "replace", Append: "append"};
-
-function integrateClone(clone, element, nodeAddType) {
-	if (nodeAddType == NodeAddType.Insert) return element.parentNode.insertBefore(clone, element);
-	else if (nodeAddType == NodeAddType.Replace) return element.parentNode.replace(clone, element);
-	else element.parentNode.append(clone, element);
+function getGridType(element) {
+    if (element instanceof Array) {
+        if (element.length > 0) return getGridType(element[0]);            
+    } else {
+        if (element != null && element.classList && element.classList.contains("row")) return GridType.Row;
+        else if (element.parentNode && getGridType(element.parentNode) == GridType.Row) return GridType.Col;
+    }
+    return GridType.None;
 }
 
 function createNode(tagName, className) {
-    let node = document.createNode(tagName);
+    let node = document.createElement(tagName);
     node.className = className;
     return node;
 }
 
-const GridType = { Row: "row", Col: "col" };
-
-function createElement(elm, srcType, targetType, promoted = false) {
-    if (srcType == GridType.Row) {           
-        if (targetType == GridType.Row) {
-            if (elm.length > 1) {
-                if (promoted === false) {
-                    let row = [];
-                    for (el of elm) row.appendChild(el.nodeClone(true));
-                    return row;
-                } else {
-                    let col = [];
-                    for (el of elm) {
-                        col.appendChild(createElement(elm, GridType.Row, GridType.Col));
-                    }
-                    return createElement(col, GridType.Col, GridType.Row);
-                }
-            }
-            else return elm;
-        } else if (targetType == GridType.Col) {
-            if (elm.length == 1) {
-                let container = createNode("DIV", "container");            
-                container.appendChild(elm.cloneNode(true));
-                let col = createNode("DIV", "col");            
-                col.appendChild(container);
-                return col;
-            } else {
-                let container = createNode("DIV", "container");
-                for (el of elm) {
-                    container.appendChild(el.nodeClone(true));
-                }
-                let c = createNode("DIV", "col");
-                c.appendChild(container);
-                return c;
-            }
+function promoteElement(elm, targetType) {
+    if (getGridType(elm) == GridType.Row) {
+        if (targetType == GridType.Col) {
+            let container = createNode("DIV", "container");
+            if (elm instanceof Array) {            
+                for (el of elm) container.appendChild(el.cloneNode(true));
+            } else container.appendChild(elm.cloneNode(true));
+            let col = createNode("DIV", "col");
+            col.appendChild(container);
+            return col;
+        } else {
+            if (elm instanceof Array) {
+                let arr = [];
+                for (el of elm) arr.push(el.cloneNode(true));
+                return arr;
+            } else return elm.cloneNode(true);
         }
-    } else if (srcType == GridType.Col) {
+    } else {
         if (targetType == GridType.Row) {
-            if (elm.length == 1) {            
-                let row = createNode("DIV", "row");
-                row.appendChild(elm.cloneNode(true));
-                return row;
-            } else {
-                let r = createNode("DIV", "row");
-                for (el of elm) {
-                    r.appendChild(el.nodeClone(true));
+            let row = createNode("DIV", "row");
+            if (elm instanceof Array) {  
+                for (el in elm) {
+                    console.log("before crash", el);
+                    row.appendChild(el.cloneNode(true));
                 }
-                return r;
-            }
-        } else if (targetType == GridType.Col) {
-            if (elm.length > 1) {
-                if (promoted === false) {
-                    let col = [];
-                    for (el of elm) col.appendChild(el.nodeClone(true));
-                    return col;
-                } else {
-                    let row = [];
-                    for (el of elm) {
-                        row.appendChild(createElement(elm, GridType.Col, GridType.Row));
-                    }
-                    return createElement(col, GridType.Col, GridType.Row);
-                }
-            } else return elm;
+            } else row.appendChild(elm.cloneNode(true));
+            return row;
+        }  else {
+            if (elm instanceof Array) {
+                let arr = [];
+                for (el of elm) arr.push(el.cloneNode(true));
+                return arr;
+            } else return elm.cloneNode(true);
         }
-    }
+    }    
 }
+
 function createWrapper(insrt, elm, region) {
-    if (isCol(elm)){
-        if (isCol(insrt)) {
-            if (region == Region.LEFT || region == Region.RIGHT) {
-                if (region == Region.LEFT) return createElement([elm, insrt], GridType.Col, GridType.Col, false);
-                else return createElement([insrt, elm],  GridType.Col, GridType.Col, false);
-            } else {
-                if (region == Region.TOP) return createElement([insrt, elm], GridType.Col, GridType.Col, true);
-                else return createElement([elm, insrt], GridType.Col, GridType.Col, true);
-            }
-        } else if (isRow(insrt)) {
-            if (region == Region.LEFT || region == Region.RIGHT) {
-                let col = createElement(insrt, GridType.Col); // convert insrt from row to col
-                if (region == Region.LEFT) return createElement([elm, col], GridType.Col, GridType.Col, false);
-                else return createElement([col, elm], GridType.Col, GridType.Col, false);                
-            } else {
-                let row = createElement(elm, GridType.Row); //convert elm from col to row
-                if (region == Region.TOP) return createElement([insrt, row], GridType.Row, GridType.Col);
-                else return createElement([row, insrt], GridType.Row, GridType.Col);
-            }
-        }
-    } else if (isRow(elm)) {
-        if (isCol(insrt)) {
-            if (region == Region.LEFT || region == Region.RIGHT) {                
-                let col = createElement(elm, GridType.Col); //convert elm from row to col
-                if (region == Region.LEFT) return createElement([insrt, col], GridType.Col, GridType.Row);
-                else return createElement([col, insrt], GridType.Col, GridType.Row);
-            } else {
-                let row = createElement(insrt, GridType.Row); //convert insrt from col to row
-                if (region == Region.TOP) return createElement([row, elm], GridType.Row, GridType.Row, false);
-                return createElement([elm, row], GridType.Row, GridType.Row, false);
-            }
-        } else if (isRow(insrt)) {
-            if (region == Region.LEFT || region == Region.RIGHT) {
-                if (region == Region.LEFT) return createElement([insrt, elm], GridType.Row, GridType.Row, true);
-                else return createElement([elm, insrt], GridType.Row, GridType.Row, true);                
-            } else {
-                if (region == Region.TOP) return createElement([elm, insrt], GridType.Row);
-                else return createElement([insrt, elm], GridType.Row);
-            }
-        }
+    let insrt_new, elm_new;
+    if (isLeftRight(region)) {
+        insrt_new = promoteElement(insrt, GridType.Col);
+        elm_new = promoteElement(elm, GridType.Col);
+    } else {
+        insrt_new = promoteElement(insrt, GridType.Row);
+        elm_new = promoteElement(elm, GridType.Row);
     }
+    let arr;
+    if (getGridType(elm) === GridType.Col && isLeftBottom(region) || getGridType(elm) === GridType.Row && !isLeftBottom(region)) arr = [elm_new, insrt_new];
+    else arr = [insrt_new, elm_new];
+    
+    return promoteElement(arr, getGridType(elm));    
 }
 
-function insertElement(inserted, elm, region) {
-    if (isCol(elm)) {
-        if (region == Region.LEFT) {
-            // create clone
-            let clone = createWrapper(inserted, elm, region); // create clone
-            let new_elm = integrateClone(clone, elm); // insert
-            erase(inserted);
-        } else if (region == Region.RIGHT) {
+function erase(dragged_item, target, arr, region) {
+    let childNode = null, parentNode = dragged_item;
+    do {
+        childNode = parentNode;
+        parentNode = childNode.parentNode;
+    } while (parentNode != null && countChildren(parentNode) == 1)
 
-        } else if (region == Region.TOP) {
-
-        } else if (region == Region.BOTTOM) {
-
-        }
-    }
+    if (parentNode != null) parentNode.removeChild(childNode);
+    if (arr instanceof Array) {
+        if (region == Region.LEFT || region == Region.TOP) {
+            return [arr[arr.length-1], arr[0]];
+        } else return arr;
+    } else return [arr, target];
 }
 
 function handleDragStart(ev) {
   this.style.opacity = '0.4';  // this / e.target is the source node.
 	dragged_item = ev.target
-	dragged_item.ondragstart = handleDragStart;
+
 }
 
-/*
+function countChildren(element) {
+    let count = 0;
+    if (element.childNodes) {
+        for (let item of element.childNodes) {
+            if (item.nodeType != Node.TEXT_NODE) ++count;
+        }
+    }
+    return count;
+}
+
+function findRoot(element) {
+    let child = null, parent = element;
+    do {
+        child = parent;
+        parent = child.parentNode;
+    } while (parent != null && countChildren(parent) == 1)
+    return child;
+}
+function sameRoot(element1, element2) {
+    return findRoot(element1) == findRoot(element2);
+}
 function handleDragOver(ev) {
+    if (ev.target == dragged_item) return;
+    if (sameRoot(ev.target, dragged_item)) return;
+    
     ev.preventDefault(); // Necessary. Allows us to drop.
-		if (ev.target != last_dragged_over_item) { //swap back the last one
-			[dragged_item, dragged_over_item] = exchangeElements(dragged_item, last_dragged_over_item);
-		}
-		// swap the current one
-		[dragged_item, dragged_over_item] = exchangeElements(dragged_item, ev.target);
-		dragged_over_item.ondragover = handleDragOver;
-		last_dragged_over_item = dragged_over_item;
+
+    // get the target element where the mouse pointer is
+    let elm = document.elementFromPoint(ev.clientX, ev.clientY);
+
+    console.log(getGridType(dragged_item) + " " + getGridType(elm));
+    // get the region of the target element where the mouse pointer is
+    let region = getRegion(elm.getBoundingClientRect(), ev.clientX, ev.clientY);
+    console.log(region);
+    
+    if (region == Region.TOP) return;
+    
+
+    // create wrapper    
+    let wrapper = createWrapper(dragged_item, elm, region);
+    
+    // insert the wrapper in front of the target element
+    let new_elm = elm;
+    let arr = []
+    if (wrapper instanceof Array) {
+        for (let el of wrapper) {
+            new_elm = elm.parentNode.insertBefore(el, new_elm);
+            arr.push(new_elm);
+        }
+    } else {
+        new_elm = elm.parentNode.insertBefore(wrapper, new_elm);
+        arr.push(new_elm);
+    }
+    //remove the target element
+    elm.parentNode.removeChild(elm);
+
+    //erase the dragged element and point to the wrapper
+    [dragged_item, target_item] = erase(dragged_item, ev.target, arr, region);
+
+    dragged_item.ondragstart = handleDragStart;
+    target_item.ondragover = handleDragOver;
 }
-*/
 
-function handleDragOver(ev) {
-    ev.preventDefault(); // Necessary. Allows us to drop.
-		// insert the current one
-		dragged_item = insertElement(dragged_item, ev.target, r);
-		ev.target.ondragover = handleDragOver;
-}
-
-
-function handleDrop(ev) {
-
-}
