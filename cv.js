@@ -119,9 +119,7 @@ function remove(element) {
 function promote(element, targetGridType) {
     let root = element.cloneNode(true);
     if (targetGridType == GridType.Row) {
-        if (getGridType(element) == GridType.Row) {
-            return [root, root];
-        } else if (getGridType(element) == GridType.Col) {
+        if (getGridType(element) == GridType.Col) {
             let row = createNode("DIV", "row");
             row.appendChild(root);
             return [row, root];
@@ -133,10 +131,9 @@ function promote(element, targetGridType) {
             let col = createNode("DIV", "col");
             col.appendChild(container);
             return [col, root];
-        } else if (getGridType(element) == GridType.Col) {
-            return [root, root];
         }
     }
+    return [root, root];
 }
 function handleDragOver(ev) {
      
@@ -176,4 +173,41 @@ function handleDragOver(ev) {
     dragged_item = cloneRoot;
     
 }
+
+$(function() {
+  
+    $(".panel1, .panel2").resizable({        
+        handles: "e",
+        grid: [20, 10],
+        autoHide: true,
+        start: function(event, ui) {       
+            this.lastParentHeight = $(this).parent()[0].clientHeight;
+            this.parentHeightChange = false;
+            this.tempWidth = ui.size.width;
+            $(this).toggleClass("col");
+        },
+        resize: function(event, ui) {
+            ui.size.height = ui.size.originalSize;
+            
+            console.log($(this).parent()[0].clientHeight + ", " + this.lastParentHeight);
+            if ($(this).parent()[0].clientHeight != this.lastParentHeight) {
+                if (!this.parentHeightChange) {
+                    if (this.tempWidth < ui.size.width) this.lastWidth = ui.size.width - 20;
+                    else this.lastWidth = ui.size.width + 20;
+                    this.parentHeightChange = true;
+                } else {
+                    ui.size.width = this.lastWidth;
+                }
+            } else {
+                this.parentHeightChange = false;
+            }
+            this.tempWidth = ui.size.width;
+        },
+        stop: function(event, ui) {
+
+        }
+    });
+
+
+});
 
