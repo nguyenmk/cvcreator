@@ -100,72 +100,37 @@ $(function() {
         }
     });
 
+    $.fn.storeCurrentDimension = function() {
+        let w = $(this).width();
+        let h = $(this).height();
+        $(this).toggleClass("col-sm").toggleClass("col-sm-auto");
+        $(this).width(w);
+        $(this).height(h);
+    }
+
+    $("div.row .mycol").storeCurrentDimension();
+
     
     // make column resizable
-    $("div.row .mycol:not(:last-child)").resizable({        
+    $("div.row .mycol:not(:last-child)").resizable({   
+        helper: "resizable-helper",     
         handles: "e",
       //  grid: [20, 10],
         autoHide: true,
         start: function(event, ui) {       
-            this.lastParentHeight = $(this).parent()[0].clientHeight;
-            this.parentHeightChange = false;
-            this.tempWidth = ui.size.width;
-            $(this).toggleClass("col-sm");
-            $(this).toggleClass("col-sm-auto");
+            this.w = $(this).width();
+            this.h = $(this).height();            
         },
         resize: function(event, ui) {
             ui.size.height = ui.originalSize.height;
-            
-            console.log($(this).parent()[0].clientHeight + ", " + this.lastParentHeight);
-            if ($(this).parent()[0].clientHeight != this.lastParentHeight) {
-                if (!this.parentHeightChange) {
-                    if (this.tempWidth < ui.size.width) this.lastWidth = ui.size.width - 10;
-                    else this.lastWidth = ui.size.width + 10;
-                    this.parentHeightChange = true;
-                } else {
-                    ui.size.width = this.lastWidth;
-                }
-            } else {
-                this.parentHeightChange = false;
-            }
-            this.tempWidth = ui.size.width;
-            
+            $neighbor = $(this).next();
+            $neighbor.width($neighbor.width() - ui.helper.width() + ui.element.width());
+            console.log($(this).width() + "," + $neighbor.width());
+            console.log("helper", ui.element.width() + "," + ui.helper.width());
         },
         stop: function(event, ui) {
         }
     });
-   
-        // make column resizable
-        $("div.container .row:not(:last)").resizable({        
-            handles: "s",
-          //  grid: [20, 10],
-            autoHide: true,
-            start: function(event, ui) {       
-                this.lastParentWidth = $(this).parent()[0].clientWidth;
-                this.parentWidthChange = false;
-                this.tempHeight = ui.size.height;
-            },
-            resize: function(event, ui) {
-                ui.size.width = ui.originalSize.width;
-                
-                console.log($(this).parent()[0].clientWidth + ", " + this.lastParentWidth);
-                if ($(this).parent()[0].clientWidth != this.lastParentWidth) {
-                    if (!this.parentWidthChange) {
-                        if (this.tempHeight < ui.size.height) this.lastHeight = ui.size.height - 10;
-                        else this.lastHeight = ui.size.height + 10;
-                        this.parentWidthChange = true;
-                    } else {
-                        ui.size.height = this.lastHeight;
-                    }
-                } else {
-                    this.parentWidthChange = false;
-                }
-                this.tempHeight = ui.size.height;
-                
-            },
-            stop: function(event, ui) {
-            }
-        });
-
+    
 });
 
