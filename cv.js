@@ -27,7 +27,7 @@ $(function() {
     }
 
     $.fn.isRow = function () { return $(this).hasClass("row"); };
-    $.fn.isCol = function() { return $(this).hasClass("mycol")};
+    $.fn.isCol = function() { return $(this).hasClass("col") || $(this).hasClass("col-auto")};
 
     $.fn.getContainer = function() {
         let $child = null, $parent = $(this);
@@ -38,18 +38,19 @@ $(function() {
         return $child;
     }
 
+    var count = 0;
     // make row and column items draggable
-    $("div.mycol, div.row").draggable({
+    $("div.col, div.row").draggable({
         helper: "clone",
         opacity: 0.34,
         start: function(event, ui) {
             // store the original width and height of the item
             this.original_width = $(this).width();
             this.original_height = $(this).height();
-
             //initially, the inserted_item will be $(this)
             this.inserted_item = $(this);
             this.inserted_item.css("opacity", "0.34");
+            
         },
         drag: function(event, ui) {
             // set the helper width and height to its original values
@@ -62,17 +63,18 @@ $(function() {
         
             // get the region of the target element where the mouse pointer is
             let region = $(this).getRegion(target.getBoundingClientRect(), event.clientX, event.clientY);
-
+            console.log(region +", isRow" + $(target).isRow());
+            console.log(target);
             if (!$(target).isRow() && !$(target).isCol()) return;
             if ($(target).isRow() && (region != Region.TOP && region != Region.BOTTOM)) return;
             if ($(target).isCol() && (region != Region.LEFT && region != Region.RIGHT)) return;
 
             // get the container of the dragged object
             let $container = $(this).getContainer();
-
+            let $parent = $container.parent();
             // remove the dragged object from the screen, but keep it in $dragged
             let $dragged = $(this).detach().css("opacity","");
-            if ($dragged.isCol()) $dragged.removeClass("col-sm-auto").addClass("col-sm");
+            if ($dragged.isCol()) $dragged.applyCol(true);
             
             // initially the wrapper will be $dragged
             let $wrapper = $dragged;
@@ -83,7 +85,7 @@ $(function() {
                     $wrapper = $('<div class="row ui-draggable ui-draggable-handle"></div>').append($dragged);
             } else if ($(target).isCol()) {
                 if ($(this).isRow())
-                    $wrapper = $('<div class="col-sm mycol ui-draggable ui-draggable-handle"></div>')
+                    $wrapper = $('<div class="col ui-draggable ui-draggable-handle"></div>')
                                     .append($('<div class="container"></div>').append($dragged));
             }                
             
@@ -93,44 +95,48 @@ $(function() {
             this.inserted_item.css("opacity", "0.34");
 
             // remove original container of the dragged object
-            if ($container[0] !== $dragged[0]) $container.remove();            
+            if ($container[0] !== $dragged[0]) $container.remove();
+            if ($parent.isRow()) $parent.children().applyCol(true);
         },
         stop: function(event, ui) {
             this.inserted_item.css("opacity", "");            
         }
     });
 
-    $.fn.storeCurrentDimension = function() {
-        let w = $(this).width();
-        let h = $(this).height();
-        $(this).toggleClass("col-sm").toggleClass("col-sm-auto");
-        $(this).width(w);
-        $(this).height(h);
+    $.fn.applyCol = function(isOn) {
+        if (isOn) {
+            $(this).addClass("col").removeClass("col-auto");
+        } else {
+            let w = $(this).width();
+            $(this).removeClass("col").addClass("col-auto");
+            $(this).width(w);
+        }
     }
 
-    $("div.row .mycol").storeCurrentDimension();
+    //$("div.row .col:not(:last-child)").storeCurrentDimension(true);
 
     
     // make column resizable
-    $("div.row .mycol:not(:last-child)").resizable({   
-        helper: "resizable-helper",     
+    $("div.row .col:not(:last-child)").resizable({     
         handles: "e",
       //  grid: [20, 10],
         autoHide: true,
-        start: function(event, ui) {       
-            this.w = $(this).width();
-            this.h = $(this).height();            
+        start: function(event, ui) { 
+            this.widthSum = $(this).next().width() + $(this).width();     
+            this.lastWidth = $(this).width();
+            $(this).parent().children().applyCol(false);
         },
         resize: function(event, ui) {
-            ui.size.height = ui.originalSize.height;
-            $neighbor = $(this).next();
-            $neighbor.width($neighbor.width() - ui.helper.width() + ui.element.width());
-            console.log($(this).width() + "," + $neighbor.width());
-            console.log("helper", ui.element.width() + "," + ui.helper.width());
+            ui.size.height = ui.originalSize.height;  //fix the height
+            $neighbor = $(this).next();  
+            if (this.widthSum < ui.element.width()) {
+                $neighbor.width(this.widthSum - this.lastWidth);
+                $(this).width(this.lastWidth);
+            } else {
+                this.lastWidth = $(this).width();
+                $neighbor.width(this.widthSum - ui.element.width());            
+            } 
         },
-        stop: function(event, ui) {
-        }
     });
-    
 });
 
