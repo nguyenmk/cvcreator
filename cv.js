@@ -3,197 +3,124 @@
 //document.getElementById("mydivheader").ondragstart = handleDragStart;
 //document.getElementById("Move").ondragover = handleDragOver;
 
-
-const GridType = { Row: "row", Col:"col", None: "none"};
-
-const Region = { LEFT: "left", RIGHT: "right", BOTTOM: "bottom", TOP: "top"};
-
-function isLeftRight(region) { return region < 0; }
-function isLeftBottom(region) { return Math.abs(region) == 2; }
-
-function getRegion(box, x, y) {
-	if (box.width > box.height) {
-		let w_lo = box.width / 6;
-		let w_hi = w_lo * 5;
-		let h_mi = box.height / 2;
-		if (x < box.left + w_lo) return Region.LEFT;
-		else if (x > box.left + w_hi) return Region.RIGHT;
-		else if (y < box.top + h_mi) return Region.TOP;
-		else return Region.BOTTOM;
-	} else {
-		let h_lo = box.height / 6;
-		let h_hi = h_lo * 5;
-		let w_mi = box.width / 2;
-		if (y < box.top + h_lo) return Region.TOP;
-		else if (y > box.top + h_hi) return Region.BOTTOM;
-		else if (x < box.left + w_mi) return Region.LEFT;
-		else return Region.RIGHT;
-	}
-}
-
-let div_elements = document.getElementsByTagName("DIV");
-for (var i = 0; i < div_elements.length; ++i) {
-    let elm = div_elements[i];
-    let gridType = getGridType(elm);
-    if ( gridType == GridType.Row || gridType == GridType.Col) {
-        console.log(elm);
-        elm.draggable = true;
-        elm.ondragstart = handleDragStart;
-        elm.ondragover = handleDragOver;
-    }
-}
-
-let dragged_item = null;
-let last_dragged_over_item = null;
-
-function can_exchange(element1, element2) {
-	return element1 != null && element2 != null && element1 != element2 && element1.parentNode != null && element2.parentNode != null;
-}
-//only exchange elements having the same parent
-function exchangeElements(element1, element2) {
-	if (can_exchange(element1, element2)) {
-		var clonedElement1 = element1.cloneNode(true);
-		var clonedElement2 = element2.cloneNode(true);
-		element2.parentNode.replaceChild(clonedElement1, element2);
-		element1.parentNode.replaceChild(clonedElement2, element1);
-		return [clonedElement1, clonedElement2];
-	}
-	else return [element1, element2];
-}
-
-function getGridType(element) {
-    if (element instanceof Array) {
-        if (element.length > 0) return getGridType(element[0]);            
-    } else {
-        if (element != null && element.classList && element.classList.contains("row")) return GridType.Row;
-        else if (element.parentNode && getGridType(element.parentNode) == GridType.Row) return GridType.Col;
-    }
-    return GridType.None;
-}
-
-function createNode(tagName, className) {
-    let node = document.createElement(tagName);
-    node.className = className;
-    return node;
-}
-
-function countChildren(element) {
-    let count = 0;
-    if (element.childNodes) {
-        for (let item of element.childNodes) {
-            if (item.nodeType != Node.TEXT_NODE) ++count;
-        }
-    }
-    return count;
-}
-
-function findRoot(element) {
-    let child = null, parent = element;
-    do {
-        child = parent;
-        parent = child.parentNode;
-    } while (parent != null && countChildren(parent) == 1)
-    return child;
-}
-
-function sameRoot(element1, element2) {
-    return findRoot(element1) == findRoot(element2);
-}
-
-function handleDragStart(ev) {
-    this.style.opacity = '0.4';  // this / e.target is the source node.
-      dragged_item = ev.target
-  
-}
-  
-function remove(element) {
-    let child = null, parent = element;
-    do {
-        child = parent;
-        parent = child.parentNode;
-    } while (countChildren(parent) == 1)
-
-    parent.removeChild(child);
-}
-
-function promote(element, targetGridType) {
-    let root = element.cloneNode(true);
-    if (targetGridType == GridType.Row) {
-        if (getGridType(element) == GridType.Col) {
-            let row = createNode("DIV", "row");
-            row.appendChild(root);
-            return [row, root];
-        }
-    } else if (targetGridType == GridType.Col) {
-        if (getGridType(element) == GridType.Row) {
-            let container = createNode("DIV", "container");
-            container.appendChild(root);
-            let col = createNode("DIV", "col");
-            col.appendChild(container);
-            return [col, root];
-        }
-    }
-    return [root, root];
-}
-function handleDragOver(ev) {
-     
-    ev.preventDefault(); // Necessary. Allows us to drop.
-
-    if (ev.target == dragged_item) return;
-
-    // get the target element where the mouse pointer is
-    let hovered_item = document.elementFromPoint(ev.clientX, ev.clientY);
-
-    // get the region of the target element where the mouse pointer is
-    let region = getRegion(hovered_item.getBoundingClientRect(), ev.clientX, ev.clientY);
-
-    console.log(region + " ", getGridType(hovered_item));
-
-    if (getGridType(hovered_item) == GridType.Row && (region != Region.TOP && region != Region.BOTTOM)) return;
-    if (getGridType(hovered_item) == GridType.Col && (region != Region.LEFT && region != Region.RIGHT)) return;
-
-    // clone other item
-    let [clone, cloneRoot] = promote(dragged_item, getGridType(hovered_item));
-    
-    // insert clone item
-    let inserted_item;
-    if (region == Region.LEFT || region == Region.TOP) {
-        inserted_item = hovered_item.parentNode.insertBefore(clone, hovered_item);
-    } else {
-        if (hovered_item.nextSibling != null)
-            inserted_item = hovered_item.parentNode.insertBefore(clone, hovered_item.nextSibling);
-        else
-            inserted_item = hovered_item.parentNode.appendChild(clone, hovered_item);
-    }
-
-    // remove other item
-    remove(dragged_item);
-
-    // assign new dragged_item
-    dragged_item = cloneRoot;
-    
-}
-
 $(function() {
-  
-    $(".panel1, .panel2").resizable({        
+    const Region = { LEFT: "left", RIGHT: "right", BOTTOM: "bottom", TOP: "top"};
+
+    $.fn.getRegion = function(box, x, y) {
+        if (box.width > box.height) {
+            let w_lo = box.width / 6;
+            let w_hi = w_lo * 5;
+            let h_mi = box.height / 2;
+            if (x < box.left + w_lo) return Region.LEFT;
+            else if (x > box.left + w_hi) return Region.RIGHT;
+            else if (y < box.top + h_mi) return Region.TOP;
+            else return Region.BOTTOM;
+        } else {
+            let h_lo = box.height / 6;
+            let h_hi = h_lo * 5;
+            let w_mi = box.width / 2;
+            if (y < box.top + h_lo) return Region.TOP;
+            else if (y > box.top + h_hi) return Region.BOTTOM;
+            else if (x < box.left + w_mi) return Region.LEFT;
+            else return Region.RIGHT;
+        }
+    }
+
+    $.fn.isRow = function () { return $(this).hasClass("row"); };
+    $.fn.isCol = function() { return $(this).hasClass("mycol")};
+
+    $.fn.getContainer = function() {
+        let $child = null, $parent = $(this);
+        do {
+            $child = $parent;
+            $parent = $child.parent();
+        } while ($parent.children(":not(.ui-draggable-dragging)").length == 1)
+        return $child;
+    }
+
+    // make row and column items draggable
+    $("div.mycol, div.row").draggable({
+        helper: "clone",
+        opacity: 0.34,
+        start: function(event, ui) {
+            // store the original width and height of the item
+            this.original_width = $(this).width();
+            this.original_height = $(this).height();
+
+            //initially, the inserted_item will be $(this)
+            this.inserted_item = $(this);
+            this.inserted_item.css("opacity", "0.34");
+        },
+        drag: function(event, ui) {
+            // set the helper width and height to its original values
+            ui.helper.width(this.original_width).height(this.original_height);
+        
+            // get the target element where the mouse is pointing at
+            let target = document.elementFromPoint(event.clientX, event.clientY);
+        
+            if (jQuery.contains(this, target) || this === target) return;
+        
+            // get the region of the target element where the mouse pointer is
+            let region = $(this).getRegion(target.getBoundingClientRect(), event.clientX, event.clientY);
+
+            if (!$(target).isRow() && !$(target).isCol()) return;
+            if ($(target).isRow() && (region != Region.TOP && region != Region.BOTTOM)) return;
+            if ($(target).isCol() && (region != Region.LEFT && region != Region.RIGHT)) return;
+
+            // get the container of the dragged object
+            let $container = $(this).getContainer();
+
+            // remove the dragged object from the screen, but keep it in $dragged
+            let $dragged = $(this).detach().css("opacity","");
+            if ($dragged.isCol()) $dragged.removeClass("col-sm-auto").addClass("col-sm");
+            
+            // initially the wrapper will be $dragged
+            let $wrapper = $dragged;
+
+            //put $dragged inside a wrapper if necessary
+            if ($(target).isRow()) {
+                if ($(this).isCol())
+                    $wrapper = $('<div class="row ui-draggable ui-draggable-handle"></div>').append($dragged);
+            } else if ($(target).isCol()) {
+                if ($(this).isRow())
+                    $wrapper = $('<div class="col-sm mycol ui-draggable ui-draggable-handle"></div>')
+                                    .append($('<div class="container"></div>').append($dragged));
+            }                
+            
+            this.inserted_item = (region == Region.LEFT || region == Region.TOP)? 
+                                $wrapper.insertBefore($(target)) : $wrapper.insertAfter($(target));
+
+            this.inserted_item.css("opacity", "0.34");
+
+            // remove original container of the dragged object
+            if ($container[0] !== $dragged[0]) $container.remove();            
+        },
+        stop: function(event, ui) {
+            this.inserted_item.css("opacity", "");            
+        }
+    });
+
+    
+    // make column resizable
+    $("div.row .mycol:not(:last-child)").resizable({        
         handles: "e",
-        grid: [20, 10],
+      //  grid: [20, 10],
         autoHide: true,
         start: function(event, ui) {       
             this.lastParentHeight = $(this).parent()[0].clientHeight;
             this.parentHeightChange = false;
             this.tempWidth = ui.size.width;
-            $(this).toggleClass("col");
+            $(this).toggleClass("col-sm");
+            $(this).toggleClass("col-sm-auto");
         },
         resize: function(event, ui) {
-            ui.size.height = ui.size.originalSize;
+            ui.size.height = ui.originalSize.height;
             
             console.log($(this).parent()[0].clientHeight + ", " + this.lastParentHeight);
             if ($(this).parent()[0].clientHeight != this.lastParentHeight) {
                 if (!this.parentHeightChange) {
-                    if (this.tempWidth < ui.size.width) this.lastWidth = ui.size.width - 20;
-                    else this.lastWidth = ui.size.width + 20;
+                    if (this.tempWidth < ui.size.width) this.lastWidth = ui.size.width - 10;
+                    else this.lastWidth = ui.size.width + 10;
                     this.parentHeightChange = true;
                 } else {
                     ui.size.width = this.lastWidth;
@@ -202,12 +129,43 @@ $(function() {
                 this.parentHeightChange = false;
             }
             this.tempWidth = ui.size.width;
+            
         },
         stop: function(event, ui) {
-
         }
     });
-
+   
+        // make column resizable
+        $("div.container .row:not(:last)").resizable({        
+            handles: "s",
+          //  grid: [20, 10],
+            autoHide: true,
+            start: function(event, ui) {       
+                this.lastParentWidth = $(this).parent()[0].clientWidth;
+                this.parentWidthChange = false;
+                this.tempHeight = ui.size.height;
+            },
+            resize: function(event, ui) {
+                ui.size.width = ui.originalSize.width;
+                
+                console.log($(this).parent()[0].clientWidth + ", " + this.lastParentWidth);
+                if ($(this).parent()[0].clientWidth != this.lastParentWidth) {
+                    if (!this.parentWidthChange) {
+                        if (this.tempHeight < ui.size.height) this.lastHeight = ui.size.height - 10;
+                        else this.lastHeight = ui.size.height + 10;
+                        this.parentWidthChange = true;
+                    } else {
+                        ui.size.height = this.lastHeight;
+                    }
+                } else {
+                    this.parentWidthChange = false;
+                }
+                this.tempHeight = ui.size.height;
+                
+            },
+            stop: function(event, ui) {
+            }
+        });
 
 });
 
