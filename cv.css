@@ -1,5 +1,9 @@
 .row, .mycol {
     border-style: solid;
+    margin: 5px;
+}
+.container {
+  border-style: solid;
 }
 #mydiv {
   z-index: 9;

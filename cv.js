@@ -55,9 +55,11 @@ $(function() {
             ui.helper.width(this.original.w).height(this.original.h);
             // get the target element where the mouse is pointing at
             let target = document.elementFromPoint(event.clientX, event.clientY);
-        
+            
+            if (target == null) return;
+
             if (jQuery.contains(this, target) || this === target) return;
-        
+            
             // get the region of the target element where the mouse pointer is
             let region = $(this).getRegion(target.getBoundingClientRect(), event.clientX, event.clientY);
 
@@ -99,7 +101,7 @@ $(function() {
             if ($container[0] !== $dragged[0]) $container.remove();
         },
         stop: function(event, ui) {
-            this.inserted.css("opacity", "");            
+            this.inserted.css("opacity", "");           
         }
     });
 
