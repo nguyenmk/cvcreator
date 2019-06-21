@@ -1,4 +1,4 @@
-div {
+.row, .mycol {
     border-style: solid;
 }
 #mydiv {
@@ -18,4 +18,12 @@ div {
 
 .ui-draggable-dragging {
   pointer-events: none;
+}
+
+.lastcol {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  flex-basis: 0;
+  flex-grow: 1;
 }
