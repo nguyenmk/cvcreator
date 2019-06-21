@@ -58,8 +58,10 @@ $(function() {
             
             if (target == null) return;
 
+
             if (jQuery.contains(this, target) || this === target) return;
-            
+            if (!$(this).closest('.container').is( $(target).closest('.container'))) return;
+
             // get the region of the target element where the mouse pointer is
             let region = $(this).getRegion(target.getBoundingClientRect(), event.clientX, event.clientY);
 
