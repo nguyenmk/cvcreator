@@ -27,6 +27,7 @@
 .row {
   position: relative;
 }
+
 .lastcol, .lastrow {
   position: relative;
   margin: 0;
@@ -52,14 +53,10 @@
   height: 100%;
 }
 
-.handler-c {
+
+.handler-c, .handler-r {
   display:none;
 }
-
-.lastcol:hover .handler-c-wrapper .handler-c, .handler-c-wrapper:hover .handler-c {
-  display:block;
-}
-
 
 .lastrow .handler-r-wrapper, .lastrow .handler-r {
   position: absolute;
@@ -76,12 +73,4 @@
   height: 8px;
   width: 100%;
   font-size: 20px;
-}
-
-.handler-r {
-  display:none;
-}
-
-.lastrow:hover .handler-r-wrapper .handler-r, .handler-r-wrapper:hover .handler-r {
-  display:block;
 }

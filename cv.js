@@ -22,12 +22,13 @@ $(function() {
     }
 
     $.fn.getContainerDown = function() {
-        let $child = null, $parent = $(this);
-        do {
-            $child = $parent;
-            $parent = $child.parent();
-        } while ($parent.children(".mycol:not(.ui-draggable-dragging), .row:not(.ui-draggable-dragging)").length <= 1)
-        return $child;
+        let $parent = $(this);
+        let $children = $parent.children(".container, .mycol:not(.ui-draggable-dragging), .row:not(.ui-draggable-dragging)");
+        while ($children.length == 1) {
+            $parent = $children.eq(0);
+            $children = $parent.children(".container, .mycol:not(.ui-draggable-dragging):not(.handler-c-wrapper), .row:not(.ui-draggable-dragging)");
+        }
+        return $parent;
     }
     $.fn.prependHandler = function () {
         if ($(this).isCol())
@@ -43,17 +44,33 @@ $(function() {
     var isDragOn = false;
     var hovered = null;
 
-    $(document).on("mouseenter",".mycol .handler-c-wrapper, .row .handler-r-wrapper, .lastcol, .lastrow", function(){
+    // handle hover event on handler wrappers
+    $(document).on("mouseenter",".mycol .handler-c-wrapper, .row .handler-r-wrapper", function(){
         if (isDragOn) {
-            if ($(this).hasClass("lastcol") || $(this).hasClass("lastrow")) hovered = $(this);
-            else hovered = $(this).parent();
+            hovered = $(this).parent();
+            $(this).find(".handler-c, .handler-r").css("display", "block");
         }
     }).on("mouseleave",".mycol .handler-c-wrapper, .row .handler-r-wrapper, .lastcol, .lastrow", function() {
         if (isDragOn) {
+            $(this).find(".handler-c, .handler-r").css("display", "none");
             hovered = null;
         }
     });
 
+    // handle hover event on .lastcol, .lastrow 
+    $(document).on("mouseenter",".lastcol, .lastrow", function(){
+        if (isDragOn) {
+            hovered = $(this);
+            $(this).find(".handler-c, .handler-r").css("display", "block");
+        }
+    }).on("mouseleave",".mycol .handler-c-wrapper, .row .handler-r-wrapper, .lastcol, .lastrow", function() {
+        if (isDragOn) {
+            $(this).find(".handler-c, .handler-r").css("display", "none");
+            hovered = null;
+        }
+    });
+
+    
     var selected = null;
     $(document).on("mousedown", "div.mycol, div.row", function(ev){
         ev.stopPropagation();
@@ -70,7 +87,7 @@ $(function() {
         $(this).draggable( {
             helper: "clone",
             opacity: 0.34,
-            containment:$(this).closest('.container'),
+            containment:$(this).closest('.component'),
             start: function(event, ui) {
                 $(this).data("width", $(this).width()).data("height",$(this).height());            
                 isDragOn = true;
@@ -80,14 +97,13 @@ $(function() {
                 ui.helper.width($(this).data("width")).height($(this).data("height"));
             },
             stop: function(event, ui) {            
-                if (hovered == null) {
-                    return;
-                }
-                isDragOn = false;
+                if (hovered == null) return;
                 if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
-                let $container = $(this).getContainerUp();
-                let $dragged = $(this).detach();
                 
+                let $container = $(this).getContainerUp();
+                let $contained = $(this).getContainerDown();
+                
+                $dragged = $contained.detach();                
                 if ($dragged.isRow() && hovered.isCol()) {
                     let $col = $('<div class="mycol"></div>').prependHandler().makeDraggable();
                     $col.append($('<div class="container"></div>').append($dragged));
@@ -99,33 +115,39 @@ $(function() {
                 }
                 
                 $dragged.insertBefore(hovered);
-                if (!$container.is($(this))) $container.remove();
-                selected = $(this);
+                if (!$container.is($contained)) $container.remove();
+                
+                selected = $(contained);
+                hovered.children(".handler-c-wrapper, .handler-r-wrapper").children(".handler-c, .handler-r").css("display", "none");
+                isDragOn = false;
             }
         });
         return this;
     }
 
     $("div.mycol, div.row").makeDraggable();
-   
-    // make column resizable
-    $("div.row .mycol").resizable({     
-        handles: "e",
-        autoHide: true,
-        start: function(event, ui) { 
-            this.widthSum = $(this).next().width() + $(this).width();
-        },
-        resize: function(event, ui) {            
-            ui.size.height = ui.originalSize.height;  //fix the height
-            $neighbor = $(this).next();  
-            if (this.widthSum <= ui.element.width()) {
-                $neighbor.width(0);
-                $(this).width(this.widthSum);
-            } else {
-                $neighbor.width(this.widthSum - ui.element.width());            
-            } 
-        },
-    });
-    
+
+    $.fn.makeResizable = function() {
+        $(this).resizable({     
+            handles: "e",
+            autoHide: true,
+            start: function(event, ui) { 
+                this.widthSum = $(this).next().width() + $(this).width();
+            },
+            resize: function(event, ui) {            
+                ui.size.height = ui.originalSize.height;  //fix the height
+                $neighbor = $(this).next();  
+                if (this.widthSum <= ui.element.width()) {
+                    $neighbor.width(0);
+                    $(this).width(this.widthSum);
+                } else {
+                    $neighbor.width(this.widthSum - ui.element.width());            
+                } 
+            },
+        });
+        return this;
+    }
+
+    $(".mycol").makeResizable();
 });
 
