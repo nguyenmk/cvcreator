@@ -55,7 +55,8 @@
 .handler-c {
   display:none;
 }
-.handler-c-wrapper:hover .handler-c {
+
+.lastcol:hover .handler-c-wrapper .handler-c, .handler-c-wrapper:hover .handler-c {
   display:block;
 }
 
@@ -80,6 +81,7 @@
 .handler-r {
   display:none;
 }
-.handler-r-wrapper:hover .handler-r {
+
+.lastrow:hover .handler-r-wrapper .handler-r, .handler-r-wrapper:hover .handler-r {
   display:block;
 }

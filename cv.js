@@ -12,7 +12,7 @@ $(function() {
     $.fn.isRow = function () { return $(this).hasClass("row") || $(this).hasClass("lastrow"); };
     $.fn.isCol = function() { return $(this).hasClass("mycol") || $(this).hasClass("lastcol") };
 
-    $.fn.getContainer = function() {
+    $.fn.getContainerUp = function() {
         let $child = null, $parent = $(this);
         do {
             $child = $parent;
@@ -21,6 +21,14 @@ $(function() {
         return $child;
     }
 
+    $.fn.getContainerDown = function() {
+        let $child = null, $parent = $(this);
+        do {
+            $child = $parent;
+            $parent = $child.parent();
+        } while ($parent.children(".mycol:not(.ui-draggable-dragging), .row:not(.ui-draggable-dragging)").length <= 1)
+        return $child;
+    }
     $.fn.prependHandler = function () {
         if ($(this).isCol())
             $(this).prepend($('<div class="handler-c-wrapper"><div class="handler-c">&#9660;</div></div>'));
@@ -34,53 +42,72 @@ $(function() {
 
     var isDragOn = false;
     var hovered = null;
-    $('.handler-c-wrapper, .handler-r-wrapper').hover(function(){
-        if (isDragOn) hovered = $(this).parent();
-    }, function() {
-        if (isDragOn) hovered = null;
-    });
-    
-    var selected = null;
-    $("div.mycol, div.row").mouseup(function(ev){
-        ev.stopPropagation();
-        if (selected !== null) selected.css("opacity","");
-        selected = $(this);
-        selected.css("opacity", "0.34");
-    })
 
-    // make row and column items draggable
-    $("div.mycol, div.row").draggable({
-        helper: "clone",
-        opacity: 0.34,
-        start: function(event, ui) {
-            $(this).data("width", $(this).width()).data("height",$(this).height());            
-            isDragOn = true;
-        },
-        drag: function(event, ui) {
-            ui.helper.width($(this).data("width")).height($(this).data("height"));
-        },
-        stop: function(event, ui) {
-            isDragOn = false;
-            if (hovered == null) return;
-            
-            let $container = $(this).getContainer();
-            let $dragged = $(this).detach();
-            
-            if ($dragged.isRow() && hovered.isCol()) {
-                let $col = $('<div class="mycol"</div>').prependHandler();
-                $col.append($('<div class="container"></div>').append($dragged));
-                $dragged = $col;
-            } else if ($dragged.isCol() && hovered.isRow()) {
-                let $row = $('<div class="row"></div>').prependHandler();
-                $row.append($dragged);
-                $dragged = $row;
-            }
-            
-            $dragged.insertBefore(hovered);
-            if (!$container.is($(this))) $container.remove();
+    $(document).on("mouseenter",".mycol .handler-c-wrapper, .row .handler-r-wrapper, .lastcol, .lastrow", function(){
+        if (isDragOn) {
+            if ($(this).hasClass("lastcol") || $(this).hasClass("lastrow")) hovered = $(this);
+            else hovered = $(this).parent();
+        }
+    }).on("mouseleave",".mycol .handler-c-wrapper, .row .handler-r-wrapper, .lastcol, .lastrow", function() {
+        if (isDragOn) {
+            hovered = null;
         }
     });
 
+    var selected = null;
+    $(document).on("mousedown", "div.mycol, div.row", function(ev){
+        ev.stopPropagation();
+        if ($(this).is(selected)) {
+            selected.css("opacity","");
+            selected = null;
+        } else {
+            if (selected !== null) selected.css("opacity","");
+            selected = $(this).css("opacity", "0.34");
+        }
+    })
+
+    $.fn.makeDraggable = function () {
+        $(this).draggable( {
+            helper: "clone",
+            opacity: 0.34,
+            containment:$(this).closest('.container'),
+            start: function(event, ui) {
+                $(this).data("width", $(this).width()).data("height",$(this).height());            
+                isDragOn = true;
+                $(this).css("opacity", "0.34");
+            },
+            drag: function(event, ui) {
+                ui.helper.width($(this).data("width")).height($(this).data("height"));
+            },
+            stop: function(event, ui) {            
+                if (hovered == null) {
+                    return;
+                }
+                isDragOn = false;
+                if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
+                let $container = $(this).getContainerUp();
+                let $dragged = $(this).detach();
+                
+                if ($dragged.isRow() && hovered.isCol()) {
+                    let $col = $('<div class="mycol"></div>').prependHandler().makeDraggable();
+                    $col.append($('<div class="container"></div>').append($dragged));
+                    $dragged = $col;
+                } else if ($dragged.isCol() && hovered.isRow()) {
+                    let $row = $('<div class="row ui-draggable ui-draggable-handle"></div>').prependHandler().makeDraggable();
+                    $row.append($dragged);
+                    $dragged = $row;
+                }
+                
+                $dragged.insertBefore(hovered);
+                if (!$container.is($(this))) $container.remove();
+                selected = $(this);
+            }
+        });
+        return this;
+    }
+
+    $("div.mycol, div.row").makeDraggable();
+   
     // make column resizable
     $("div.row .mycol").resizable({     
         handles: "e",
