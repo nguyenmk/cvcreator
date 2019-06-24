@@ -6,10 +6,10 @@
 $(function() {
   
     // add div.lastColTag type to all the .row elements
-    $(".row").append('<div class="lastcol"></div>');
+    $(".myrow").append('<div class="lastcol"></div>');
     $(".container").append('<div class="lastrow"></div>');
 
-    $.fn.isRow = function () { return $(this).hasClass("row") || $(this).hasClass("lastrow"); };
+    $.fn.isRow = function () { return $(this).hasClass("myrow") || $(this).hasClass("lastrow"); };
     $.fn.isCol = function() { return $(this).hasClass("mycol") || $(this).hasClass("lastcol") };
 
     $.fn.getContainerUp = function() {
@@ -17,69 +17,97 @@ $(function() {
         do {
             $child = $parent;
             $parent = $child.parent();
-        } while ($parent.children(".mycol:not(.ui-draggable-dragging), .row:not(.ui-draggable-dragging)").length <= 1)
+        } while ($parent.children(".mycol:not(.ui-draggable-dragging), .myrow:not(.ui-draggable-dragging)").length <= 1)
         return $child;
     }
 
     $.fn.getContainerDown = function() {
         let $parent = $(this);
-        let $children = $parent.children(".container, .mycol:not(.ui-draggable-dragging), .row:not(.ui-draggable-dragging)");
+        let $children = $parent.children(".container, .mycol:not(.ui-draggable-dragging), .myrow:not(.ui-draggable-dragging)");
         while ($children.length == 1) {
             $parent = $children.eq(0);
-            $children = $parent.children(".container, .mycol:not(.ui-draggable-dragging):not(.handler-c-wrapper), .row:not(.ui-draggable-dragging)");
+            $children = $parent.children(".container, .mycol:not(.ui-draggable-dragging):not(.handler-wrapper-c), .myrow:not(.ui-draggable-dragging)");
         }
         return $parent;
     }
+
     $.fn.prependHandler = function () {
         if ($(this).isCol())
-            $(this).prepend($('<div class="handler-c-wrapper"><div class="handler-c">&#9660;</div></div>'));
+            $(this).prepend($('<div class="handler-wrapper-c"><div class="handler-symbol-c">&#9660;</div></div>'));
         else 
-            $(this).prepend($('<div class="handler-r-wrapper"><div class="handler-r">&#9658;</div></div>'));
+            $(this).prepend($('<div class="handler-wrapper-r"><div class="handler-symbol-r">&#9658;</div></div>'));
         return this;
     }
 
     $("div.mycol, div.lastcol").prependHandler();
-    $("div.row, div.lastrow").prependHandler();
+    $("div.myrow, div.lastrow").prependHandler();
 
     var isDragOn = false;
     var hovered = null;
 
     // handle hover event on handler wrappers
-    $(document).on("mouseenter",".mycol .handler-c-wrapper, .row .handler-r-wrapper", function(){
+    $(document).on('mouseenter','[class|="handler-wrapper"], .lastcol, .lastrow', function(){
         if (isDragOn) {
-            hovered = $(this).parent();
-            $(this).find(".handler-c, .handler-r").css("display", "block");
+            if ($(this).hasClass('lastcol') || $(this).hasClass('lastrow')) hovered = $(this);
+            else hovered = $(this).parent();
+            $(this).find('[class|="handler-symbol"]').css("display", "block");
         }
-    }).on("mouseleave",".mycol .handler-c-wrapper, .row .handler-r-wrapper, .lastcol, .lastrow", function() {
+    }).on('mouseleave','[class|="handler-wrapper"], .lastcol, .lastrow', function() {
         if (isDragOn) {
-            $(this).find(".handler-c, .handler-r").css("display", "none");
+            $(this).find('[class|="handler-symbol"]').css("display", "none");
             hovered = null;
         }
     });
 
-    // handle hover event on .lastcol, .lastrow 
-    $(document).on("mouseenter",".lastcol, .lastrow", function(){
-        if (isDragOn) {
-            hovered = $(this);
-            $(this).find(".handler-c, .handler-r").css("display", "block");
-        }
-    }).on("mouseleave",".mycol .handler-c-wrapper, .row .handler-r-wrapper, .lastcol, .lastrow", function() {
-        if (isDragOn) {
-            $(this).find(".handler-c, .handler-r").css("display", "none");
-            hovered = null;
-        }
-    });
+    var prop = {name: null, editor: null};
+    $(document).on('focus', '.property-value', function(event) {
+        prop = {name: $(this).prev().attr("title"), editor: $(this)};
+    }).on('input', '.property-value', function(event) {
+        let newValue = $(this).text();
+        selected.text.css(prop.name, newValue);
+    }).on('blur', '.property-value', function(event) {
+        if (prop.name !== "text") prop.editor.text(selected.text.css(prop.name));
+        prop = {name: null, editor: null};
+    })
 
-    
-    var selected = null;
-    $(document).on("mousedown", "div.mycol, div.row", function(ev){
+    $.fn.addProperty = function(field, value) {
+        if (!isNaN(parseInt(field))) return this;
+
+        if (typeof(value) !== "string") return this;
+            
+        var li = $('<li class="list-group-item property"></li>');
+        var name = $('<div class="property-name"></div>').html(field);
+        name.attr("data-toggle","tooltip").attr("title", field);
+        
+        var content = $('<div class="property-value" contenteditable="true"></div>').html(value);
+        li.append(name).append(content);
+        $(this).append(li);
+        return this;
+    }
+
+    $.fn.showProperties = function() {
+        let textElm = $(this).children("span");
+        let style = textElm.prop('style');
+        let properties = $('#properties');
+        properties.empty();
+        properties.addProperty("text", textElm.text());
+
+        for (let field in style) {
+            properties.addProperty(field, textElm.css(field));
+        }
+    }
+
+    var selected = {div:null, text:null};
+
+    $(document).on("mousedown", ".mycol, .myrow", function(ev){
         ev.stopPropagation();
-        if ($(this).is(selected)) {
-            selected.css("opacity","");
-            selected = null;
+        if ($(this).is(selected.div)) {
+            selected.div.css("opacity","");
+            selected = {div:null, text:null};
         } else {
-            if (selected !== null) selected.css("opacity","");
-            selected = $(this).css("opacity", "0.34");
+            if (selected.div !== null) selected.div.css("opacity","");
+            $(this).css("opacity", "0.34").showProperties();
+            selected = {div:$(this), text:$(this).children("span")};
         }
     })
 
@@ -97,19 +125,23 @@ $(function() {
                 ui.helper.width($(this).data("width")).height($(this).data("height"));
             },
             stop: function(event, ui) {            
-                if (hovered == null) return;
+                if (hovered == null) {
+                    isDragOn = false;
+                    return;
+                }
+                isDragOn = false;
                 if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
                 
                 let $container = $(this).getContainerUp();
                 let $contained = $(this).getContainerDown();
                 
-                $dragged = $contained.detach();                
+                $dragged = $contained.css("opacity", "").detach();                
                 if ($dragged.isRow() && hovered.isCol()) {
                     let $col = $('<div class="mycol"></div>').prependHandler().makeDraggable();
                     $col.append($('<div class="container"></div>').append($dragged));
                     $dragged = $col;
                 } else if ($dragged.isCol() && hovered.isRow()) {
-                    let $row = $('<div class="row ui-draggable ui-draggable-handle"></div>').prependHandler().makeDraggable();
+                    let $row = $('<div class="myrow"></div>').prependHandler().makeDraggable();
                     $row.append($dragged);
                     $dragged = $row;
                 }
@@ -117,15 +149,16 @@ $(function() {
                 $dragged.insertBefore(hovered);
                 if (!$container.is($contained)) $container.remove();
                 
-                selected = $(contained);
-                hovered.children(".handler-c-wrapper, .handler-r-wrapper").children(".handler-c, .handler-r").css("display", "none");
-                isDragOn = false;
+                selected.div = $dragged.css("opacity", "0.34");
+                selected.text = selected.div.children("span");
+                hovered.find('[class|="handler-symbol"]').css("display", "none");
+                
             }
         });
         return this;
     }
 
-    $("div.mycol, div.row").makeDraggable();
+    $(".mycol, .myrow").makeDraggable();
 
     $.fn.makeResizable = function() {
         $(this).resizable({     

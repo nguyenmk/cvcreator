@@ -1,6 +1,11 @@
-.row, .mycol {
+.myrow, .mycol {
     border-style: solid;
     margin: 5px;
+}
+
+.myrow {
+  display: flex;
+  flex-wrap: wrap;
 }
 .container {
   border-style: solid;
@@ -24,7 +29,7 @@
   pointer-events: none;
 }
 
-.row {
+.myrow {
   position: relative;
 }
 
@@ -37,7 +42,7 @@
   flex-grow: 1;
 }
 
-.lastcol .handler-c-wrapper, .lastcol .handler-c {
+.lastcol .handler-wrapper-c, .lastcol .handler-symbol-c {
   position: absolute;
   top: -4px;
   left: -4px;
@@ -45,7 +50,7 @@
   height: 100%;
 }
 
-.handler-c-wrapper, .handler-c {
+.handler-wrapper-c, .handler-symbol-c {
   position: absolute;
   top: -8px;
   left: -8px;
@@ -54,11 +59,11 @@
 }
 
 
-.handler-c, .handler-r {
+.handler-symbol-c, .handler-symbol-r {
   display:none;
 }
 
-.lastrow .handler-r-wrapper, .lastrow .handler-r {
+.lastrow .handler-wrapper-r, .lastrow .handler-symbol-r {
   position: absolute;
   top: -10px;
   left: -5px;
@@ -66,11 +71,34 @@
   width: 100%;
 }
 
-.handler-r-wrapper, .handler-r {
+.handler-wrapper-r, .handler-symbol-r {
   position: absolute;
   top: -11px;
   left: -9px;
   height: 8px;
   width: 100%;
   font-size: 20px;
+}
+
+#properties {
+  width: 400px;
+}
+
+.property {
+  display: flex;
+  flex-wrap: wrap;
+}
+.property-name {  
+  width: 100px;
+  margin: 10px;
+  /*word-wrap: break-word;*/
+  overflow :hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
+.property-value {
+  width: 200px;
+  border: 1px solid black;
+  padding: 10px;
 }
