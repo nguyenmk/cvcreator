@@ -1,14 +1,12 @@
 .myrow, .mycol {
-    margin: 5px;
+  margin: 5px;
 }
 
 .myrow {
   display: flex;
   flex-wrap: wrap;
 }
-.container {
-  border-style: solid;
-}
+
 #mydiv {
   z-index: 9;
   background-color: #f1f1f1;

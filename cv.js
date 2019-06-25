@@ -11,12 +11,21 @@ $(function() {
                     , 'margin', 'padding'];
     properties = $('#properties').hide();
 
-    // add div.lastColTag type to all the .row elements
-    $(".myrow").append('<div class="lastcol"></div>');
-    $(".container").append('<div class="lastrow"></div>');
-
+        
     $.fn.isRow = function () { return $(this).hasClass("myrow") || $(this).hasClass("lastrow"); };
     $.fn.isCol = function() { return $(this).hasClass("mycol") || $(this).hasClass("lastcol") };
+
+    $.fn.appendLast = function() {
+        if ($(this).children(".mycol, .myrow").length > 0) {
+            if ($(this).isCol()) $(this).append('<div class="lastrow"></div>');
+            else $(this).append('<div class="lastcol"></div>');
+        }
+        return this;
+    }
+
+     // append last column or row
+    $(".myrow").appendLast();
+    $(".mycol").appendLast();
 
     $.fn.getContainerUp = function() {
         let $child = null, $parent = $(this);
@@ -29,10 +38,10 @@ $(function() {
 
     $.fn.getContainerDown = function() {
         let $parent = $(this);
-        let $children = $parent.children(".container, .mycol:not(.ui-draggable-dragging), .myrow:not(.ui-draggable-dragging)");
+        let $children = $parent.children(".mycol:not(.ui-draggable-dragging), .myrow:not(.ui-draggable-dragging)");
         while ($children.length == 1) {
             $parent = $children.eq(0);
-            $children = $parent.children(".container, .mycol:not(.ui-draggable-dragging):not(.handler-wrapper-c), .myrow:not(.ui-draggable-dragging)");
+            $children = $parent.children(".mycol:not(.ui-draggable-dragging):not(.handler-wrapper-c), .myrow:not(.ui-draggable-dragging)");
         }
         return $parent;
     }
@@ -45,20 +54,32 @@ $(function() {
         return this;
     }
 
-    $("div.mycol, div.lastcol").prependHandler();
-    $("div.myrow, div.lastrow").prependHandler();
+    $(".myrow, .lastrow").prependHandler();
+    $(".mycol, .lastcol").prependHandler();
 
     var isDragOn = false;
     var hovered = null;
 
     // handle hover event on handler wrappers
-    $(document).on('mouseenter','[class|="handler-wrapper"], .lastcol, .lastrow', function(){
+    $(document).on('mouseenter','[class|="handler-wrapper"]', function(){
         if (isDragOn) {
-            if ($(this).hasClass('lastcol') || $(this).hasClass('lastrow')) hovered = $(this);
-            else hovered = $(this).parent();
+            hovered = $(this).parent();
             $(this).find('[class|="handler-symbol"]').css("display", "block");
         }
-    }).on('mouseleave','[class|="handler-wrapper"], .lastcol, .lastrow', function() {
+    }).on('mouseleave','[class|="handler-wrapper"]', function() {
+        if (isDragOn) {
+            $(this).find('[class|="handler-symbol"]').css("display", "none");
+            hovered = null;
+        }
+    });
+
+     // handle hover event on handler wrappers
+     $(document).on('mouseenter','.lastcol, .lastrow', function(){
+        if (isDragOn) {
+            hovered = $(this);
+            $(this).find('[class|="handler-symbol"]').css("display", "block");
+        }
+    }).on('mouseleave','.lastcol, .lastrow', function() {
         if (isDragOn) {
             $(this).find('[class|="handler-symbol"]').css("display", "none");
             hovered = null;
@@ -103,7 +124,6 @@ $(function() {
     }
 
     var selected = {div:null, text:null};
-    var hoveredItem = null;
 
     $(document).on("mousedown", ".mycol, .myrow", function(ev){
         ev.stopPropagation();
@@ -117,19 +137,40 @@ $(function() {
             properties.show();
             selected = {div:$(this), text:$(this).children("span")};
         }
-    }).on("mouseenter", '.mycol, .myrow', function(ev) {
-        ev.stopPropagation();
-        if (! $(this).is(hoveredItem)) {
-            if (hoveredItem !== null) {
-                hoveredItem.css('opacity','');
-                hoveredItem = $(this);
-            }
-        }
-        $(this).css('opacity', '0.34');
-    }).on("mouseleave", '.mycol, .myrow', function(ev) {
-       // ev.stopPropagation();
-        $(this).css('opacity', '');
     })
+
+    let hoveredItem = null;
+
+    // handle hover event on .myrow or .mycol
+    $(document).on('mouseenter', '.myrow, .mycol', function() {
+        if (isDragOn) return;
+        if (hoveredItem !== null) hoveredItem.css('border-style', '');
+        hoveredItem = $(this);
+        $(this).css('border-style', 'solid');
+    }).on('mouseleave', '.myrow, .mycol', function() {
+        if (isDragOn) return;
+        if (hoveredItem !== null) hoveredItem.css('border-style', '');
+        hoveredItem = null;
+    })
+
+    $(document).on('mouseenter', '.myrow, .mycol', function() {
+        if (isDragOn) return;
+        if (hoveredItem !== null) hoveredItem.css('border-style', '');
+        hoveredItem = $(this).css('border-style', 'solid');
+    }).on('mouseleave', '.myrow, .mycol', function() {
+        if (isDragOn) return;
+        if (hoveredItem !== null) hoveredItem.css('border-style', '');
+        hoveredItem = null;
+    })
+
+    $(document).on('mouseenter', '.lastrow, .lastcol', function() {
+        if (hoveredItem !== null) hoveredItem.css('border-style', '');
+        hoveredItem = $(this).parent().css('border-style', 'solid');
+    }).on('mouseleave', '.myrow, .mycol', function() {
+        if (hoveredItem !== null) hoveredItem.css('border-style', '');
+        hoveredItem = null;
+    })
+
 
     $.fn.makeDraggable = function () {
         $(this).draggable( {
@@ -158,11 +199,13 @@ $(function() {
                 $dragged = $contained.css("opacity", "").css('border','').detach();                
                 if ($dragged.isRow() && hovered.isCol()) {
                     let $col = $('<div class="mycol"></div>').prependHandler().makeDraggable().makeResizable();
-                    $col.append($('<div class="container"></div>').append($dragged));
+                    $col.append($dragged).appendLast();
+                    $col.children().last().prependHandler();
                     $dragged = $col;
                 } else if ($dragged.isCol() && hovered.isRow()) {
                     let $row = $('<div class="myrow"></div>').prependHandler().makeDraggable().makeResizable();
-                    $row.append($dragged);
+                    $row.append($dragged).appendLast();
+                    $row.children().last().prependHandler();
                     $dragged = $row;
                 }
                 
