@@ -1,5 +1,4 @@
 .myrow, .mycol {
-    border-style: solid;
     margin: 5px;
 }
 
@@ -80,25 +79,38 @@
   font-size: 20px;
 }
 
+
 #properties {
-  width: 400px;
+  width: 350px;
 }
 
 .property {
   display: flex;
   flex-wrap: wrap;
+  height: 30px;
+  margin: 0;
+  padding: 0;
 }
 .property-name {  
   width: 100px;
-  margin: 10px;
+  margin-right: 10px;
+  margin-left: 10px;
+  height: 20px;
   /*word-wrap: break-word;*/
   overflow :hidden;
   white-space: nowrap;
   text-overflow: clip;
+  font-size: 12px;
 }
 
 .property-value {
   width: 200px;
-  border: 1px solid black;
-  padding: 10px;
+  border-left: 1px solid black;
+  padding-left: 5px;
+  font-size: 12px;
+  height: 20px;
+}
+
+.text {
+  word-wrap: break-word;
 }

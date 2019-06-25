@@ -5,6 +5,12 @@
 
 $(function() {
   
+    let propList = [ 'text', 'color', 'font', 'fontFamily', 'fontSize', 'fontStyle', 'textAlign'
+                    , 'border', 'borderLeft', 'borderRight', 'borderTop', 'borderBottom'
+                    , 'backgroundColor','backgroundImage', 'backgroundPosition', 'backgroundRepeat', 'backgroundSize'
+                    , 'margin', 'padding'];
+    properties = $('#properties').hide();
+
     // add div.lastColTag type to all the .row elements
     $(".myrow").append('<div class="lastcol"></div>');
     $(".container").append('<div class="lastrow"></div>');
@@ -62,20 +68,20 @@ $(function() {
     var prop = {name: null, editor: null};
     $(document).on('focus', '.property-value', function(event) {
         prop = {name: $(this).prev().attr("title"), editor: $(this)};
+        selected.div.css('max-width', selected.div.css('width'));
     }).on('input', '.property-value', function(event) {
         let newValue = $(this).text();
-        selected.text.css(prop.name, newValue);
+        if (prop.name == "text") selected.text.text(newValue);
+        else selected.text.css(prop.name, newValue);
     }).on('blur', '.property-value', function(event) {
         if (prop.name !== "text") prop.editor.text(selected.text.css(prop.name));
         prop = {name: null, editor: null};
     })
 
     $.fn.addProperty = function(field, value) {
-        if (!isNaN(parseInt(field))) return this;
+        if (!isNaN(parseInt(field)) || typeof(value) !== "string") return this;
 
-        if (typeof(value) !== "string") return this;
-            
-        var li = $('<li class="list-group-item property"></li>');
+        var li = $('<li class="list-group-item  list-group-item-primary property"></li>');
         var name = $('<div class="property-name"></div>').html(field);
         name.attr("data-toggle","tooltip").attr("title", field);
         
@@ -88,27 +94,41 @@ $(function() {
     $.fn.showProperties = function() {
         let textElm = $(this).children("span");
         let style = textElm.prop('style');
-        let properties = $('#properties');
         properties.empty();
-        properties.addProperty("text", textElm.text());
 
-        for (let field in style) {
-            properties.addProperty(field, textElm.css(field));
+        for (let field of propList) {
+            if (field === "text") properties.addProperty(field, textElm.text());
+            else properties.addProperty(field, textElm.css(field));
         }
     }
 
     var selected = {div:null, text:null};
+    var hoveredItem = null;
 
     $(document).on("mousedown", ".mycol, .myrow", function(ev){
         ev.stopPropagation();
         if ($(this).is(selected.div)) {
-            selected.div.css("opacity","");
+            selected.div.css('border','');
+            properties.hide();
             selected = {div:null, text:null};
         } else {
-            if (selected.div !== null) selected.div.css("opacity","");
-            $(this).css("opacity", "0.34").showProperties();
+            if (selected.div !== null) selected.div.css('border','');
+            $(this).css('border','1px solid').showProperties();
+            properties.show();
             selected = {div:$(this), text:$(this).children("span")};
         }
+    }).on("mouseenter", '.mycol, .myrow', function(ev) {
+        ev.stopPropagation();
+        if (! $(this).is(hoveredItem)) {
+            if (hoveredItem !== null) {
+                hoveredItem.css('opacity','');
+                hoveredItem = $(this);
+            }
+        }
+        $(this).css('opacity', '0.34');
+    }).on("mouseleave", '.mycol, .myrow', function(ev) {
+       // ev.stopPropagation();
+        $(this).css('opacity', '');
     })
 
     $.fn.makeDraggable = function () {
@@ -119,7 +139,7 @@ $(function() {
             start: function(event, ui) {
                 $(this).data("width", $(this).width()).data("height",$(this).height());            
                 isDragOn = true;
-                $(this).css("opacity", "0.34");
+                $(this).css("opacity", "0.34").css('border','1px solid');
             },
             drag: function(event, ui) {
                 ui.helper.width($(this).data("width")).height($(this).data("height"));
@@ -135,13 +155,13 @@ $(function() {
                 let $container = $(this).getContainerUp();
                 let $contained = $(this).getContainerDown();
                 
-                $dragged = $contained.css("opacity", "").detach();                
+                $dragged = $contained.css("opacity", "").css('border','').detach();                
                 if ($dragged.isRow() && hovered.isCol()) {
-                    let $col = $('<div class="mycol"></div>').prependHandler().makeDraggable();
+                    let $col = $('<div class="mycol"></div>').prependHandler().makeDraggable().makeResizable();
                     $col.append($('<div class="container"></div>').append($dragged));
                     $dragged = $col;
                 } else if ($dragged.isCol() && hovered.isRow()) {
-                    let $row = $('<div class="myrow"></div>').prependHandler().makeDraggable();
+                    let $row = $('<div class="myrow"></div>').prependHandler().makeDraggable().makeResizable();
                     $row.append($dragged);
                     $dragged = $row;
                 }
@@ -149,7 +169,7 @@ $(function() {
                 $dragged.insertBefore(hovered);
                 if (!$container.is($contained)) $container.remove();
                 
-                selected.div = $dragged.css("opacity", "0.34");
+                selected.div = $dragged.css("opacity", "").css('border','1px solid');
                 selected.text = selected.div.children("span");
                 hovered.find('[class|="handler-symbol"]').css("display", "none");
                 
@@ -165,16 +185,17 @@ $(function() {
             handles: "e",
             autoHide: true,
             start: function(event, ui) { 
-                this.widthSum = $(this).next().width() + $(this).width();
+                $(this).data({widthSum: $(this).next().width() + $(this).width()});
+                $(this).css('max-width','');
             },
             resize: function(event, ui) {            
                 ui.size.height = ui.originalSize.height;  //fix the height
                 $neighbor = $(this).next();  
-                if (this.widthSum <= ui.element.width()) {
+                if ($(this).data('widthSum') <= ui.element.width()) {
                     $neighbor.width(0);
-                    $(this).width(this.widthSum);
+                    $(this).width($(this).data('widthSum'));
                 } else {
-                    $neighbor.width(this.widthSum - ui.element.width());            
+                    $neighbor.width($(this).data('widthSum') - ui.element.width());            
                 } 
             },
         });
