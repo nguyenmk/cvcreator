@@ -1,6 +1,7 @@
 .myrow, .mycol {
-  border-style: solid;
-  padding: 10px;
+  border: 1px solid;
+  padding: 3px;
+  margin: 4px;
 }
 
 .myrow {
@@ -27,7 +28,7 @@
   pointer-events: none;
 }
 
-.myrow {
+.myrow, .mycol {
   position: relative;
 }
 
@@ -119,3 +120,9 @@
   width: 595px;
   border: 2px solid;
 }
+
+/*
+.ui-resizable-e {
+  right: 2px;
+}
+*/

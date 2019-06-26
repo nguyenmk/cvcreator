@@ -20,12 +20,17 @@ $(function() {
         return this;
     }
 
-    $.fn.setSelectedStyle = function(isOn = true) { //border
-        return (isOn === true) ? $(this).setBO('1px solid') : $(this).setBO();
+    $.fn.setSelectedStyle = function() {       
+        //return $(this).setBO('1px solid'); 
+        return $(this).setBO(); 
     }
     
-    $.fn.setHoverStyle = function(isOn = true) {
-        return (isOn === true) ? $(this).setBO('1px solid', '0.34') : $(this).setBO();        
+    $.fn.setHoverStyle = function() {     
+        return $(this).setBO('', '0.34'); 
+    }
+
+    $.fn.setNormalStyle = function() { 
+        return $(this).setBO();
     }
 
     $.new = function(elementName, className) {
@@ -78,20 +83,23 @@ $(function() {
     var hovered = null;
     var isResizeOn = false;
 
+    
     // handle hover event on handler wrappers
-    $(document).on('mouseenter','[class|="handler-wrapper"], .lastcol, .lastrow', function(){
+    $(document).on('mouseover','[class|="handler-wrapper"], .lastcol, .lastrow', function(ev){
+        ev.stopPropagation();
         if (isDragOn) {
             if ($(this).hasClass('.lastrow') || $(this).hasClass('.lastcol')) hovered = $(this);
             else hovered = $(this).parent();
             $(this).find('[class|="handler-symbol"]').css("display", "block");
         }
-    }).on('mouseleave','[class|="handler-wrapper"], .lastcol, .lastrow', function() {
+    }).on('mouseout','[class|="handler-wrapper"], .lastcol, .lastrow', function(ev) {
+        ev.stopPropagation();
         if (isDragOn) {
             $(this).find('[class|="handler-symbol"]').css("display", "none");
             hovered = null;
         }
     });
-
+    
     var prop = {name: null, editor: null};
     $(document).on('focus', '.property-value', function(event) {
         prop = {name: $(this).prev().attr("title"), editor: $(this)};
@@ -131,12 +139,12 @@ $(function() {
     $(document).on("mousedown", ".mycol, .myrow", function(ev){
         ev.stopPropagation();
         if ($(this).is(selected)) {
-            selected.setSelectedStyle(false);
+            selected.setNormalStyle();
             properties.hide();
             selected = null;
         } else {
-            if (selected != null) selected.setSelectedStyle(false);
-            selected = $(this).setSelectedStyle(true).showProps();
+            if (selected != null) selected.setNormalStyle();
+            selected = $(this).setSelectedStyle().showProps();
             properties.show();
             
         }
@@ -145,33 +153,36 @@ $(function() {
 
 
     let hoveredItem = null;
-
+    
     // handle hover event on .myrow or .mycol and .lastrow, .lastcol
     $(document).on('mouseover', '.myrow, .mycol', function(ev) {
         ev.stopPropagation();
-        console.log('mouseenter', $(this)[0]);
         if (isDragOn || isResizeOn) return;
-        if (hoveredItem != null && !hoveredItem.is(selected)) hoveredItem.setHoverStyle(false);
+        if (hoveredItem != null && !hoveredItem.is(selected)) hoveredItem.setNormalStyle();
         hoveredItem = $(this);
-        if (!hoveredItem.is(selected)) hoveredItem.setHoverStyle(true);
+        if (!hoveredItem.is(selected)) hoveredItem.setHoverStyle();
     }).on('mouseout', '.myrow, .mycol', function(ev) {
         ev.stopPropagation();
-        console.log('mouseleave', $(this)[0]);
         if (isDragOn || isResizeOn) return;
-        if (hoveredItem != null && !hoveredItem.is(selected)) hoveredItem.setHoverStyle(false);
+        if (hoveredItem != null) {
+            hoveredItem.setNormalStyle();
+            if(hoveredItem.is(selected)) hoveredItem.setSelectedStyle();
+        }
         hoveredItem = null;
     }).on('mouseover', '.lastrow, .lastcol', function(ev) {
         ev.stopPropagation();
         if (isDragOn || isResizeOn) return;
-        if (hoveredItem !== null) hoveredItem.setHoverStyle(false);
-        hoveredItem = $(this).parent().setHoverStyle(true);
-    }).on('mouseout', '.myrow, .mycol', function(ev) {
+        if (hoveredItem !== null) hoveredItem.setNormalStyle();
+        hoveredItem = $(this).parent().setHoverStyle();
+    }).on('mouseout', '.lastrow, .lastcol', function(ev) {
         ev.stopPropagation();
         if (isDragOn || isResizeOn) return;
-        if (hoveredItem !== null) hoveredItem.setHoverStyle(false);
+        if (hoveredItem !== null) hoveredItem.setNormalStyle();
         hoveredItem = null;
     })
+    
 
+    //create a wrapper with the target type around the object
     $.fn.createWrapper = function($target) {
         let $newItem = $(this);
         if ($target.isCol() && $newItem.isRow()) {
@@ -187,6 +198,8 @@ $(function() {
         }
         return $newItem;
     }
+
+    // simplify an object if it is inside too many levels of containers
     $.fn.simplify = function() {        
         let $container = $(this).getContainerUp();
         let $contained = $(this).getContainerDown();
@@ -203,35 +216,30 @@ $(function() {
             start: function(event, ui) {
                 $(this).data("width", $(this).width()).data("height",$(this).height());            
                 isDragOn = true;
-                $(this).setHoverStyle(true);
-                ui.helper.setHoverStyle(true);
+                $(this).setHoverStyle();
+                ui.helper.setHoverStyle();
             },
             drag: function(event, ui) {
                 ui.helper.width($(this).data("width")).height($(this).data("height"));
             },
-            stop: function(event, ui) {            
-                if (hovered == null) {
-                    isDragOn = false;
-                    return;
-                }
+            stop: function(event, ui) {    
+                $(this).setNormalStyle().setSelectedStyle();
                 isDragOn = false;
+                if (hovered == null) return;
                 hovered.find('[class|="handler-symbol"]').css("display", "none");
-                if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) {
-                    $(this).setHoverStyle(false);
-                    $(this).setSelectedStyle(true);
-                    return;
-                }
-                let $container = $(this).getContainerUp();
+                if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
+                
+                let $container = $(this).parent().getContainerUp();
+                let $containerParent = $container.parent();
                 let $contained = $(this).getContainerDown();
                 
-                $dragged = $contained.setHoverStyle(false).detach();
-                $dragged = $dragged.createWrapper(hovered);
+                $dragged = $contained.detach().createWrapper(hovered);
                 
                 $dragged.insertBefore(hovered);
-                if (!$container.is($contained) && $container.children(".mycol:not(.ui-draggable-dragging):not(.handler-wrapper-c), .myrow:not(.ui-draggable-dragging)").length <= 1)
+                if ($container.children(".mycol:not(.ui-draggable-dragging):not(.handler-wrapper-c), .myrow:not(.ui-draggable-dragging)").length <= 1)
                     $container.simplify();
                 
-                selected = $dragged.setSelectedStyle(true);
+                selected = $dragged.setSelectedStyle();
             }
         });
         return this;
@@ -242,11 +250,11 @@ $(function() {
     $.fn.makeResizable = function() {
         $(this).resizable({     
             handles: "e",
-            autoHide: true,
+            //autoHide: true,
             start: function(event, ui) { 
                 $(this).data({widthSum: $(this).next().width() + $(this).width()});
                 $(this).css('max-width','');
-                $(this).setSelectedStyle(true);
+                $(this).setSelectedStyle();
             },
             resize: function(event, ui) {            
                 ui.size.height = ui.originalSize.height;  //fix the height
