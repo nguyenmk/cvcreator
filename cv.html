@@ -1,120 +1,77 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
 	<link rel="stylesheet" href="cv.css">
-
-	<title> My CV</title>
-</head>
 <body>
+	<div class="container-fluid">
 
-		<header>
-			<h1> Mon CV </h1>
-		</header>
-		<div class="container">
-			<div class="row">
-				<div class="mycol">					
-					<div class="container">
-						<div class="row">
-							<div class="mycol">
-								<div id="name" class="container">
-									<div class="row">
-										<div class="mycol firstname"> Minh Khoa </div>
-										<div class="mycol lastname"> NGUYEN </span>				
-										</div>
-									</div>
-									<div class="row">
-										<div class="mycol titre"> Developer</div>
-									</div>
-									<div class="row">
-										<div class="mycol paragraph-titre"> A propos</div>
-										<div class="mycol paragraph-content"> blah blah blah </div>				
-									</div>
-								</div>
-							</div>
+		<h1>Draggable DIV Element</h1>
 
-							<div class="mycol">
-								<div id="contact" class="container">
-									<div class="row field">
-										<div class="mycol field-name"> Email: </div>
-										<div class="mycol field-content"> abcdefg@gmail.com</div>
-									</div>
-									<div class="row field">
-										<div class="mycol field-name"> tel: </div>
-										<div class="mycol field-content"> 123456789</div>
-									</div>
-									<div class="row field">
-										<div class="mycol field-name"> address </div>
-										<div class="mycol field-content"> 123 ave ..., 38330 Grenoble </div>
-									</div>			
-								</div>
-							</div>
-						</div>
+		<p>Click and hold the mouse button down while moving the DIV element</p>
+	<div class="row" style="height:500px">
+
+		<div class="col component a4">
+			<div class="myrow">
+				<div class="mycol">
+					<div class="myrow">
+						<div class="mycol"><span class="text">Minh Khoa</span></div>
+						<div class="mycol"><span class="text">NGUYEN</span></div>
+					</div>
+					<div class="myrow">
+						<div class="mycol"><span class="text">Mes atouts</span></div>
+						<div class="mycol"><span class="text">abcdef</span></div>
+					</div>
+					<div class="myrow">
+						<div class="mycol"><span class="text">A propos: </span></div>
+						<div class="mycol"><span class="text">abcdef</span></div>
+					</div>
+				</div>
+				<div class="mycol">
+					<div class="myrow">
+						<div class="mycol"><span class="text"> abc chemin de ,38000, Grenoble</span></div>
+					</div>
+					<div class="myrow">
+						<div class="mycol"><span class="text">Tel:</span></div>
+						<div class="mycol"><span class="text">+33 9 99 99 99 99</span></div>
+					</div>
+					<div class="myrow">
+						<div class="mycol"><span class="text">Email: </span></div>
+						<div class="mycol"><span class="text">abcdfeg@gmail.com</span></div>
 					</div>
 				</div>
 			</div>
-					
-			<div class="row">
-				<div class="mycol">	
-					<div id = "experiences" class="container">
-						<div class="row title"> 
-							<div class="mycol">Experiences</div>
-						</div>
-						<div class="row item">
-							<div class ="mycol" >
-								<div class="container experience-item">
-									<div class="row experience-item-header">
-										<div class="mycol item-company"> Company Name </div>
-										<div class="mycol item-role"> R &amp; D Engineer </div>
-										<div class="mycol item-place"> France </div>
-										<div class="mycol item-period">
-											<div class="container">
-												<div class="row item-period-from"> <div class="mycol">Sep 2018 </div></div>
-												<div class="row item-period-to"> <div class="mycol">Jan 2019 </div></div>
-											</div>
-										</div>
-									</div>
-
-									<div class="row experience-item-description">
-										<div class = "mycol">
-											<div class ="container">
-												<div class="row">
-													<div class="mycol">Debugged codes</div>
-													<div class="mycol">Developped scripts</div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+			<div class="myrow">
+				<div class="mycol"> <div id="mydivheader" >Click here to move</div></div>
+				<div class="mycol"> <span class="text">A</span> </div>
+				<div class="mycol"> <span class="text">B</span> </div>
+				<div class="mycol"> <span class="text">C</span> </div>
 			</div>
-
-			<div class="row">
-				<div class="mycol">						
-					<div id="languages" class="container">
-						<div class="title"> Languages </div>
-						<div class="field">
-							<div class="field-name"> English: </div>
-							<div class="field-content"> fluent </div>
-						</div>
-						<div class="field">
-							<div class="field-name"> French </div>
-							<div class="field-content"> DELF B1 </div>
-						</div>			
-					</div>		
-				</div>
+			<div class="myrow">
+				<div class="mycol"> <span class="text">item A</span></div>
 			</div>
+			<div class="myrow">
+				<div class="mycol"> <span class="text">item B</span></div>
+			</div>
+			<div class="myrow">
+				<div class="mycol "> <span class="text">item C</span></div>
+			</div>                    
+
 		</div>
+
+		<div class="col">
+			<div>Properties</div>
+			<ul id = "properties" class="list-group" style="overflow-y: scroll; height:400px"></ul>
+		</div>
+    </div>
 
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 	<script src="cv.js"></script>
 </body>
 </html>

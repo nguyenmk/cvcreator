@@ -37,14 +37,13 @@ $(function() {
 
     $.fn.appendLast = function() {
         if ($(this).children(".mycol, .myrow").length > 0) {
-            ($(this).isCol())? $(this).append($.new('div', "lastrow")):$(this).append($.new('div',"lastcol"));
+            ($(this).isCol()) ? $(this).append($.new('div', "lastrow")): $(this).append($.new('div',"lastcol"));
         }
         return this;
     }
 
      // append last column or row
-    $(".myrow").appendLast();
-    $(".mycol").appendLast();
+    $(".myrow, .mycol").each(function() { $(this).appendLast(); });
 
     $.fn.getContainerUp = function() {
         let $child = null, $parent = $(this);
@@ -65,41 +64,28 @@ $(function() {
         return $parent;
     }
 
-    $.fn.prependHandler = function (isCol = true) {
-        if (isCol === true)
-            $(this).prepend($('<div class="handler-wrapper-c"><div class="handler-symbol-c">&#9660;</div></div>'));
+    $.fn.prependHandler = function () {
+        if ($(this).isCol()) 
+              $(this).prepend($('<div class="handler-wrapper-c"><div class="handler-symbol-c">&#9660;</div></div>'));
         else 
             $(this).prepend($('<div class="handler-wrapper-r"><div class="handler-symbol-r">&#9658;</div></div>'));
         return this;
     }
 
-    $(".myrow, .lastrow").prependHandler(false);
-    $(".mycol, .lastcol").prependHandler(true);
+    $(".myrow, .lastrow, .mycol, .lastcol").each(function() { $(this).prependHandler(false); });
 
     var isDragOn = false;
     var hovered = null;
     var isResizeOn = false;
 
     // handle hover event on handler wrappers
-    $(document).on('mouseenter','[class|="handler-wrapper"]', function(){
+    $(document).on('mouseenter','[class|="handler-wrapper"], .lastcol, .lastrow', function(){
         if (isDragOn) {
-            hovered = $(this).parent();
+            if ($(this).hasClass('.lastrow') || $(this).hasClass('.lastcol')) hovered = $(this);
+            else hovered = $(this).parent();
             $(this).find('[class|="handler-symbol"]').css("display", "block");
         }
-    }).on('mouseleave','[class|="handler-wrapper"]', function() {
-        if (isDragOn) {
-            $(this).find('[class|="handler-symbol"]').css("display", "none");
-            hovered = null;
-        }
-    });
-
-     // handle hover event on handler wrappers
-     $(document).on('mouseenter','.lastcol, .lastrow', function(){
-        if (isDragOn) {
-            hovered = $(this);
-            $(this).find('[class|="handler-symbol"]').css("display", "block");
-        }
-    }).on('mouseleave','.lastcol, .lastrow', function() {
+    }).on('mouseleave','[class|="handler-wrapper"], .lastcol, .lastrow', function() {
         if (isDragOn) {
             $(this).find('[class|="handler-symbol"]').css("display", "none");
             hovered = null;
@@ -108,15 +94,14 @@ $(function() {
 
     var prop = {name: null, editor: null};
     $(document).on('focus', '.property-value', function(event) {
-        $.fill()
         prop = {name: $(this).prev().attr("title"), editor: $(this)};
-        selected.div.css('max-width', selected.div.css('width'));
+        selected.css('max-width', selected.css('width'));
     }).on('input', '.property-value', function(event) {
         let newValue = $(this).text();
-        if (prop.name == "text") selected.text.text(newValue);
-        else selected.text.css(prop.name, newValue);
+        if (prop.name == "text") selected.children("span.text").text(newValue);
+        else selected.css(prop.name, newValue);
     }).on('blur', '.property-value', function(event) {
-        if (prop.name !== "text") prop.editor.text(selected.text.css(prop.name));
+        if (prop.name !== "text") prop.editor.text(selected.children("span.text").css(prop.name));
         prop = {name: null, editor: null};
     })
 
@@ -133,24 +118,25 @@ $(function() {
         properties.empty();
 
         for (let field of propList) {
-            if (field === "text") properties.addProp(field, textElm.text());
-            else properties.addProp(field, textElm.css(field));
+            if (field === "text") {
+                properties.addProp(field, $(this).children("span").text());
+            } else properties.addProp(field, $(this).css(field));
         }
         return $(this);
     }
 
 
-    var selected = {div:null, text:null};
+    var selected = null;
 
     $(document).on("mousedown", ".mycol, .myrow", function(ev){
         ev.stopPropagation();
-        if ($(this).is(selected.div)) {
-            selected.div.setSelectedStyle(false);
+        if ($(this).is(selected)) {
+            selected.setSelectedStyle(false);
             properties.hide();
-            selected = {div:null, text:null};
+            selected = null;
         } else {
-            if (selected.div != null) selected.div.setSelectedStyle(false);
-            selected = {div:$(this).setSelectedStyle(true).showProps(), text:$(this).children("span")};
+            if (selected != null) selected.setSelectedStyle(false);
+            selected = $(this).setSelectedStyle(true).showProps();
             properties.show();
             
         }
@@ -161,20 +147,26 @@ $(function() {
     let hoveredItem = null;
 
     // handle hover event on .myrow or .mycol and .lastrow, .lastcol
-    $(document).on('mouseenter', '.myrow, .mycol', function() {
+    $(document).on('mouseover', '.myrow, .mycol', function(ev) {
+        ev.stopPropagation();
+        console.log('mouseenter', $(this)[0]);
         if (isDragOn || isResizeOn) return;
-        if (hoveredItem != null && !hoveredItem.is(selected.div)) hoveredItem.setHoverStyle(false);
+        if (hoveredItem != null && !hoveredItem.is(selected)) hoveredItem.setHoverStyle(false);
         hoveredItem = $(this);
-        if (!hoveredItem.is(selected.div)) hoveredItem.setHoverStyle(true);
-    }).on('mouseleave', '.myrow, .mycol', function() {
+        if (!hoveredItem.is(selected)) hoveredItem.setHoverStyle(true);
+    }).on('mouseout', '.myrow, .mycol', function(ev) {
+        ev.stopPropagation();
+        console.log('mouseleave', $(this)[0]);
         if (isDragOn || isResizeOn) return;
-        if (hoveredItem != null && !hoveredItem.is(selected.div)) hoveredItem.setHoverStyle(false);
+        if (hoveredItem != null && !hoveredItem.is(selected)) hoveredItem.setHoverStyle(false);
         hoveredItem = null;
-    }).on('mouseenter', '.lastrow, .lastcol', function() {
+    }).on('mouseover', '.lastrow, .lastcol', function(ev) {
+        ev.stopPropagation();
         if (isDragOn || isResizeOn) return;
         if (hoveredItem !== null) hoveredItem.setHoverStyle(false);
         hoveredItem = $(this).parent().setHoverStyle(true);
-    }).on('mouseleave', '.myrow, .mycol', function() {
+    }).on('mouseout', '.myrow, .mycol', function(ev) {
+        ev.stopPropagation();
         if (isDragOn || isResizeOn) return;
         if (hoveredItem !== null) hoveredItem.setHoverStyle(false);
         hoveredItem = null;
@@ -223,22 +215,23 @@ $(function() {
                     return;
                 }
                 isDragOn = false;
-                if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
-                
-                let $container = $(this).getContainerUp().parent();
+                hovered.find('[class|="handler-symbol"]').css("display", "none");
+                if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) {
+                    $(this).setHoverStyle(false);
+                    $(this).setSelectedStyle(true);
+                    return;
+                }
+                let $container = $(this).getContainerUp();
                 let $contained = $(this).getContainerDown();
                 
                 $dragged = $contained.setHoverStyle(false).detach();
                 $dragged = $dragged.createWrapper(hovered);
                 
                 $dragged.insertBefore(hovered);
-                if ($container.children(".mycol:not(.ui-draggable-dragging):not(.handler-wrapper-c), .myrow:not(.ui-draggable-dragging)").length <= 1)
+                if (!$container.is($contained) && $container.children(".mycol:not(.ui-draggable-dragging):not(.handler-wrapper-c), .myrow:not(.ui-draggable-dragging)").length <= 1)
                     $container.simplify();
                 
-                selected.div = $dragged.setSelectedStyle(true);
-                selected.text = selected.div.children("span");
-                hovered.find('[class|="handler-symbol"]').css("display", "none");
-                
+                selected = $dragged.setSelectedStyle(true);
             }
         });
         return this;

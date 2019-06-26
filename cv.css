@@ -1,5 +1,6 @@
 .myrow, .mycol {
-  margin: 5px;
+  border-style: solid;
+  padding: 10px;
 }
 
 .myrow {
@@ -111,4 +112,10 @@
 
 .text {
   word-wrap: break-word;
+}
+
+.a4 {
+  height: 842px;
+  width: 595px;
+  border: 2px solid;
 }
