@@ -51,10 +51,12 @@ $(function() {
     $(".myrow, .mycol").each(function() { $(this).appendLast(); });
 
     $.fn.getContainerUp = function() {
+        if (!$(this).isCol() && !$(this).isRow()) return null;
         let $child = null, $parent = $(this);
         do {
             $child = $parent;
             $parent = $child.parent();
+            if (!$parent.isCol() && !$parent.isRow()) break;
         } while ($parent.children(".mycol:not(.ui-draggable-dragging), .myrow:not(.ui-draggable-dragging)").length <= 1)
         return $child;
     }
@@ -88,7 +90,8 @@ $(function() {
     $(document).on('mouseover','[class|="handler-wrapper"], .lastcol, .lastrow', function(ev){
         ev.stopPropagation();
         if (isDragOn) {
-            if ($(this).hasClass('.lastrow') || $(this).hasClass('.lastcol')) hovered = $(this);
+            
+            if ($(this).hasClass('lastrow') || $(this).hasClass('lastcol')) hovered = $(this);            
             else hovered = $(this).parent();
             $(this).find('[class|="handler-symbol"]').css("display", "block");
         }
@@ -202,6 +205,8 @@ $(function() {
     // simplify an object if it is inside too many levels of containers
     $.fn.simplify = function() {        
         let $container = $(this).getContainerUp();
+        if ($container === null) return;
+        if (!$container.parent().isCol() && !$container.parent().isRow()) return;
         let $contained = $(this).getContainerDown();
         let $newItem = $contained.createWrapper($container);
         $newItem.insertBefore($container);
@@ -229,15 +234,16 @@ $(function() {
                 hovered.find('[class|="handler-symbol"]').css("display", "none");
                 if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
                 
-                let $container = $(this).parent().getContainerUp();
+                let $container = $(this).getContainerUp();
                 let $containerParent = $container.parent();
                 let $contained = $(this).getContainerDown();
                 
                 $dragged = $contained.detach().createWrapper(hovered);
                 
                 $dragged.insertBefore(hovered);
-                if ($container.children(".mycol:not(.ui-draggable-dragging):not(.handler-wrapper-c), .myrow:not(.ui-draggable-dragging)").length <= 1)
-                    $container.simplify();
+                if (!$container.is($contained)) $container.remove();
+                if ($containerParent.children(".mycol:not(.ui-draggable-dragging):not(.handler-wrapper-c), .myrow:not(.ui-draggable-dragging)").length <= 1)
+                    $containerParent.simplify();
                 
                 selected = $dragged.setSelectedStyle();
             }
