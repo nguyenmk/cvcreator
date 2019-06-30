@@ -9,6 +9,9 @@
   flex-wrap: wrap;
 }
 
+.corner-bar {
+  border: 1px solid;
+}
 #mydiv {
   z-index: 9;
   background-color: #f1f1f1;

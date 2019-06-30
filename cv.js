@@ -5,10 +5,10 @@
 
 $(function() {
   
-    let propList = [ 'text', 'color', 'font', 'fontFamily', 'fontSize', 'fontStyle', 'textAlign'
+    let propList = [ 'color', 'font', 'fontFamily', 'fontSize', 'fontStyle', 'textAlign'
                     , 'border', 'borderLeft', 'borderRight', 'borderTop', 'borderBottom'
                     , 'backgroundColor','backgroundImage', 'backgroundPosition', 'backgroundRepeat', 'backgroundSize'
-                    , 'margin', 'padding'];
+                    , 'margin', 'padding', 'width', 'height'];
     properties = $('#properties').hide();
 
     $.fn.isRow = function () { return $(this).hasClass("myrow") || $(this).hasClass("lastrow"); };
@@ -47,6 +47,7 @@ $(function() {
         return this;
     }
 
+    $("span").attr('contenteditable', true);
      // append last column or row
     $(".myrow, .mycol").each(function() { $(this).appendLast(); });
 
@@ -79,13 +80,24 @@ $(function() {
         return this;
     }
 
+    $.fn.addCornerBar = function () {
+        
+        let bar = $('<div class="corner-bar">&#10021;</div>');
+        let offset_top = - parseInt($(this).css('padding-top')) - parseInt($(this).css('border-top')) 
+                            - 20 - parseInt(bar.css('height')) + 'px';
+        let offset_right = - parseInt($(this).css('padding-right')) - parseInt($(this).css('border-right')) 
+                             - parseInt(bar.css('width')) + 3 + 'px';
+        bar.css('position', 'absolute').css('top', offset_top).css('right', offset_right).css('visibility', 'hidden');
+        $(this).append(bar);
+    }
+
+    $(".myrow, .mycol").addCornerBar();
     $(".myrow, .lastrow, .mycol, .lastcol").each(function() { $(this).prependHandler(false); });
 
     var isDragOn = false;
     var hovered = null;
     var isResizeOn = false;
 
-    
     // handle hover event on handler wrappers
     $(document).on('mouseover','[class|="handler-wrapper"], .lastcol, .lastrow', function(ev){
         ev.stopPropagation();
@@ -109,10 +121,9 @@ $(function() {
         selected.css('max-width', selected.css('width'));
     }).on('input', '.property-value', function(event) {
         let newValue = $(this).text();
-        if (prop.name == "text") selected.children("span.text").text(newValue);
-        else selected.css(prop.name, newValue);
+        selected.css(prop.name, newValue);
     }).on('blur', '.property-value', function(event) {
-        if (prop.name !== "text") prop.editor.text(selected.children("span.text").css(prop.name));
+        prop.editor.text(selected.children("span.text").css(prop.name));
         prop = {name: null, editor: null};
     })
 
@@ -120,23 +131,27 @@ $(function() {
         if (!isNaN(parseInt(field)) || typeof(value) !== "string") return this;
         var li = $.new('li', "list-group-item  list-group-item-primary property");
         var name = $.new('div', "property-name").attr("data-toggle","tooltip").attr("title", field).html(field);        
-        var content = $.new('div', "property-value").attr('contenteditable', "true").html(value);
+        //var content = $.new('div', "property-value").attr('contenteditable', "true").html(value);
+        var content = $.new('input', "jscolor").attr('value', 'ab2567');
         return $(this).append(li.append(name).append(content));
     }
 
     $.fn.showProps = function() {
-        let textElm = $(this).children("span");
         properties.empty();
-
         for (let field of propList) {
-            if (field === "text") {
-                properties.addProp(field, $(this).children("span").text());
-            } else properties.addProp(field, $(this).css(field));
+            properties.addProp(field, $(this).css(field));
         }
         return $(this);
     }
 
 
+    $.fn.setSelected = function(isSelected) {
+        if (isSelected == true) {
+            $(this).setSelectedStyle();
+        } else {
+            $(this).setNormalStyle();
+        }
+    }
     var selected = null;
 
     $(document).on("mousedown", ".mycol, .myrow", function(ev){
@@ -149,26 +164,38 @@ $(function() {
             if (selected != null) selected.setNormalStyle();
             selected = $(this).setSelectedStyle().showProps();
             properties.show();
-            
         }
     })
 
 
+    $.fn.setHovered = function (isHovered) {
+        if (isHovered === true) {
+            $(this).setHoverStyle();
+            $(this).children('.corner-bar').css('visibility', 'visible');
+        } else {
+            $(this).setNormalStyle();
+            $(this).children('.corner-bar').css('visibility', 'hidden');
+        }
+    }
 
     let hoveredItem = null;
     
     // handle hover event on .myrow or .mycol and .lastrow, .lastcol
-    $(document).on('mouseover', '.myrow, .mycol', function(ev) {
-        ev.stopPropagation();
-        if (isDragOn || isResizeOn) return;
-        if (hoveredItem != null && !hoveredItem.is(selected)) hoveredItem.setNormalStyle();
-        hoveredItem = $(this);
-        if (!hoveredItem.is(selected)) hoveredItem.setHoverStyle();
-    }).on('mouseout', '.myrow, .mycol', function(ev) {
+    $(document).on('mouseover', '.myrow, .mycol', function(ev) {        
         ev.stopPropagation();
         if (isDragOn || isResizeOn) return;
         if (hoveredItem != null) {
-            hoveredItem.setNormalStyle();
+            hoveredItem.setHovered(false);
+            if (hoveredItem.is(selected)) selected.setSelected(true);
+        }
+        hoveredItem = $(this);
+        hoveredItem.setHovered(true);
+    }).on('mouseout', '.corner-bar', function(ev) {
+        if (selected != null) selected.setSelectedStyle();
+        ev.stopPropagation();
+        if (isDragOn || isResizeOn) return;
+        if (hoveredItem != null) {
+            hoveredItem.setHovered(false);
             if(hoveredItem.is(selected)) hoveredItem.setSelectedStyle();
         }
         hoveredItem = null;
@@ -215,6 +242,7 @@ $(function() {
 
     $.fn.makeDraggable = function () {
         $(this).draggable( {
+            handle: $(this).children(".corner-bar"),
             helper: "clone",
             opacity: 0.34,
             containment:$(this).closest('.component'),
@@ -258,27 +286,16 @@ $(function() {
             handles: "e",
             //autoHide: true,
             start: function(event, ui) { 
-                $(this).data({widthSum: $(this).next().width() + $(this).width()});
-                $(this).css('max-width','');
                 $(this).setSelectedStyle();
             },
             resize: function(event, ui) {            
-                ui.size.height = ui.originalSize.height;  //fix the height
-                $neighbor = $(this).next();  
-                if ($(this).data('widthSum') <= ui.element.width()) {
-                    $neighbor.width(0);
-                    $(this).width($(this).data('widthSum'));
-                } else {
-                    $neighbor.width($(this).data('widthSum') - ui.element.width());            
-                } 
+                ui.size.height = ui.originalSize.height;  //fix the height                 
             },
-            stop: function(event, ui) {
-                isResizeOn = false;
-            }
         });
         return this;
     }
 
     $(".mycol").makeResizable();
+    
 });
 
