@@ -119,9 +119,12 @@ $(function() {
     $(document).on('focus', '.property-value', function(event) {
         prop = {name: $(this).prev().attr("title"), editor: $(this)};
         selected.css('max-width', selected.css('width'));
-    }).on('input', '.property-value', function(event) {
-        let newValue = $(this).text();
-        selected.css(prop.name, newValue);
+    }).on('change', '.property-value', function(event) {
+        let newValue = $(this).val();
+        if ($(this).hasClass('jscolor')) 
+            selected.css(prop.name, '#' + newValue);
+        else 
+            selected.css(prop.name, newValue);
     }).on('blur', '.property-value', function(event) {
         prop.editor.text(selected.children("span.text").css(prop.name));
         prop = {name: null, editor: null};
@@ -129,10 +132,10 @@ $(function() {
 
     $.fn.addProp = function(field, value) {
         if (!isNaN(parseInt(field)) || typeof(value) !== "string") return this;
-        var li = $.new('li', "list-group-item  list-group-item-primary property");
-        var name = $.new('div', "property-name").attr("data-toggle","tooltip").attr("title", field).html(field);        
-        //var content = $.new('div', "property-value").attr('contenteditable', "true").html(value);
-        var content = $.new('input', "jscolor").attr('value', 'ab2567');
+        let li = $.new('li', "list-group-item  list-group-item-primary property");
+        let name = $.new('div', "property-name").attr("data-toggle","tooltip").attr("title", field).html(field);
+        let content = $.new('input', "property-value").attr('value', value);
+        if (field.toLowerCase().indexOf('color') > -1) content = $.new('input', "property-value jscolor").attr('value', value);
         return $(this).append(li.append(name).append(content));
     }
 
@@ -141,6 +144,7 @@ $(function() {
         for (let field of propList) {
             properties.addProp(field, $(this).css(field));
         }
+
         return $(this);
     }
 
@@ -164,6 +168,7 @@ $(function() {
             if (selected != null) selected.setNormalStyle();
             selected = $(this).setSelectedStyle().showProps();
             properties.show();
+            jscolor.installByClassName('jscolor');
         }
     })
 
