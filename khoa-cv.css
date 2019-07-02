@@ -171,10 +171,10 @@
 }
 
 .comp-item-field-data {
-    font-size: 11pt;
+    font-size: 10pt;
     line-height: 10px;
     font-family: 'Titillium Web', 'Monospace';
-    font-weight: 500;
+    font-weight: bold;
 }
 
 .exp-place-data {
