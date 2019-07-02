@@ -1,0 +1,189 @@
+.containerx {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+.rowx {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.colx {
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 100%;
+    margin: 5px;
+}
+
+.page {
+    width: 21cm;
+    height: 29.7cm;
+    box-shadow: 0 0 20px rgba(0,0,0,.1);
+    background-color: #fff;
+}
+
+.column-left {
+    max-width: 14cm;
+    border-right: 1px solid #0098cf;    
+}
+
+.column-right {
+    max-width: 6.5cm;
+}
+
+.header {
+    background-color: #406A8C;
+    padding: 38px 19px 19px 19px
+
+}
+
+.footer {
+    margin-top: 10px;
+    color: white;
+    background-color: #406A8C;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.info-person {
+    left: 50px;
+}
+
+.info-localization {
+    left: 50px;
+}
+.first-name-data, .last-name-data {
+    color: white;
+    font-size: 18pt;
+    line-height: 30px;
+    font-weight: bold;
+    font-family: 'Lato';
+}
+
+.role-title-data {
+    color: #eeeeee;
+    font-size: 12pt;
+    line-height: 20px;
+    font-family: 'Lato';
+    font-weight: 500;
+}
+.email-data, .address-data, .phone-data {
+    color: #AFB4B7;
+    font-size: 11pt;
+    line-height: 14px;
+    font-family: 'Lato';
+    font-weight: 500;
+    margin: 3px;
+}
+
+.email-icon .material-icons, .address-icon .material-icons, .phone-icon .material-icons {
+    padding-top: 2px;
+    font-size: 11pt;
+    color: #AFB4B7;
+}
+
+.column-right, .column-left {
+    padding-top: 10px;
+}
+.forwords {
+    padding-top: 10px;
+    padding-bottom: 5px;
+}
+
+.experiences {
+    padding: 0px;
+    padding-top: 10px;
+}
+
+.component {
+    padding: 0px;
+}
+
+.forwords-data {
+    line-height: normal;
+    margin-top: 10px;
+    padding: 12px 14px 5px 14px;
+    font-style: italic;
+    color: #777;
+    font-size: 11pt;
+    font-family: 'Lato';
+    font-weight: 500;
+}
+
+
+.exp {
+    padding-left: 8px;
+    padding-top: 14pt;
+}
+
+.exp-header {
+    padding: 6px;
+    /*border-bottom: 1px solid #0098cf;*/
+}
+
+.comp-header {
+    padding-top: 3px;
+}
+.exp-header-data, .comp-header-data {
+    color: #0098cf;
+    font-size: 13pt;
+    line-height: 19px;
+    font-weight: 500;
+    font-family: 'Arimo', 'Sans-serif';
+    font-weight: bold;
+    word-wrap: break-word;
+}
+
+.exp-role-data {
+    color: #000;
+    font-weight: 700;
+    font-size: 11pt;
+    line-height: 14px;
+    font-family: 'Arimo', 'Sans-serif';
+}
+
+.exp-company-data {
+    color: #0098cf;
+    font-size: 11pt;
+    line-height: 14px;
+    font-family: 'Lato';
+    font-weight: 500;
+}
+
+.exp-place-data, .exp-from-data, .exp-to-data, .comp-item-value-data, .comp-item-field-data {
+    font-size: 10pt;
+    line-height: 10px;
+    font-family: 'Titillium Web', 'Monospace';
+    font-weight: 500;
+}
+.exp-place-data {
+    padding-left: 8px;
+}
+.exp-description {
+    margin-top: 5px;
+    line-height: 25pt;
+    font-family: 'Arimo', 'Sans-serif';
+}
+
+.exp-description-data {
+    font-size: 11pt;
+    line-height: 14px;
+    font-family: 'Lato';
+    font-weight: 500;
+}
+
+span {
+    padding: 3px;
+}
+
+#css-properties tr {
+    border: 1px solid;
+}
+
+br {
+    display: block;
+    margin: 5pt 0;
+    content: " ";
+}
+
