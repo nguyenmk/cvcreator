@@ -122,11 +122,23 @@
     /*border-bottom: 1px solid #0098cf;*/
 }
 
+.exp-header-data {
+    color: #0098cf;
+    font-size: 13pt;
+    line-height: 19px;
+    font-weight: 500;
+    font-family: 'Arimo', 'Sans-serif';
+    font-weight: bold;
+    word-wrap: break-word;
+}
+
 .comp-header {
     padding-top: 3px;
+    padding-bottom: 3px;
 }
-.exp-header-data, .comp-header-data {
-    color: #0098cf;
+
+.comp-header-data {
+    color: #d3f3ff;
     font-size: 13pt;
     line-height: 19px;
     font-weight: 500;
@@ -151,12 +163,20 @@
     font-weight: 500;
 }
 
-.exp-place-data, .exp-from-data, .exp-to-data, .comp-item-value-data, .comp-item-field-data {
+.exp-place-data, .exp-from-data, .exp-to-data, .comp-item-value-data {
     font-size: 10pt;
     line-height: 10px;
     font-family: 'Titillium Web', 'Monospace';
     font-weight: 500;
 }
+
+.comp-item-field-data {
+    font-size: 11pt;
+    line-height: 10px;
+    font-family: 'Titillium Web', 'Monospace';
+    font-weight: 500;
+}
+
 .exp-place-data {
     padding-left: 8px;
 }
