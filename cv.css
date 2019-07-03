@@ -1,65 +1,58 @@
-.myrow, .mycol {
-  border: 1px solid;
-  padding: 3px;
-  margin: 4px;
+.containerx {
+  display: table;
 }
 
-.myrow {
+.rowx {
   display: flex;
   flex-wrap: wrap;
 }
-
-.corner-bar {
-  border: 1px solid;
-}
-#mydiv {
-  z-index: 9;
-  background-color: #f1f1f1;
-  text-align: center;
-  border: 1px solid #d3d3d3;
+.colx {
+  display: table-cell;
+  padding: 2px;
+  margin: 2px;
 }
 
-#mydivheader {
-  padding: 10px;
-  cursor: move;
-  z-index: 10;
-  background-color: #2196F3;
-  color: #fff;
+.containerx.rowx, .containerx.colx {
+  display: table;
 }
 
 .ui-draggable-dragging {
   pointer-events: none;
 }
 
-.myrow, .mycol {
+.rowx, .colx, .lastrow, .lastcol {
   position: relative;
-}
-
-.lastcol, .lastrow {
-  position: relative;
-  margin: 0;
-  border: 0;
-  padding: 0;
-  flex-basis: 0;
-  flex-grow: 1;
+  left: 0;
+  top: 0;
 }
 
 .lastcol .handler-wrapper-c, .lastcol .handler-symbol-c {
   position: absolute;
-  top: -4px;
+  top: -2px;
   left: -4px;
   width: 8px;
-  height: 100%;
+  height: 90%;
 }
 
 .handler-wrapper-c, .handler-symbol-c {
   position: absolute;
-  top: -8px;
-  left: -8px;
-  width: 8px;
   height: 100%;
 }
 
+.handler-wrapper-c {
+  top: -8px;
+  left: -12px;
+  width: 10px;
+  font-size: 15px;
+}
+
+.handler-wrapper-c hr {
+  display:inline-block;
+  top: 2px;
+  left: 7px;
+  height:100%; 
+  position:absolute
+}
 
 .handler-symbol-c, .handler-symbol-r {
   display:none;
@@ -75,13 +68,22 @@
 
 .handler-wrapper-r, .handler-symbol-r {
   position: absolute;
-  top: -11px;
-  left: -9px;
-  height: 8px;
   width: 100%;
-  font-size: 20px;
 }
 
+.handler-wrapper-r {
+  font-size: 15px;
+  top: -8px;
+  left: -10px;
+  height: 10px;
+}
+
+.handler-wrapper-r hr{
+  display:inline-block;
+  left: 10px;
+  width:100%; 
+  position:absolute
+}
 
 #properties {
   width: 350px;
@@ -124,8 +126,14 @@
   border: 2px solid;
 }
 
-/*
+
 .ui-resizable-e {
-  right: 2px;
+  right: 3px;
+  width: 10px;
+}
+
+/*
+.colx, .rowx {
+  border: 1px solid;
 }
 */
