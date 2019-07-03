@@ -89,16 +89,6 @@ $(function() {
         return this;
     }
 
-    /*
-    $.fn.addCornerBar = function () {        
-        let bar = $('<div class="corner-bar">&#10021;</div>');
-        $(this).append(bar);
-        let offset_top = - parseInt(bar.css('height')) + 'px';        
-        let offset_right = 0;
-        bar.css('position', 'absolute').css('top', offset_top).css('right', offset_right).css('visibility', 'hidden');
-    }
-    */
-    //$(".rowx, .colx").each(function() {$(this).addCornerBar();})
     $(".rowx, .lastrow, .colx, .lastcol").each(function() { $(this).prependHandler(false); });
 
     var isDragOn = false;
@@ -108,7 +98,7 @@ $(function() {
     // handle hover event on handler wrappers
     $(document).on('mouseover','[class|="handler-wrapper"], .lastcol, .lastrow', function(ev){
         ev.stopPropagation();
-        if (isDragOn) {            
+        if (isDragOn) {
             if ($(this).hasClass('lastrow') || $(this).hasClass('lastcol')) hovered = $(this);            
             else hovered = $(this).parent();
             $(this).find('[class|="handler-symbol"]').css("display", "block");
@@ -147,10 +137,22 @@ $(function() {
 
     $.fn.showProps = function() {
         properties.empty();
+        /*
         for (let field of propList) {
             properties.addProp(field, $(this).css(field));
         }
-
+        */
+       /*
+        let props = $(this).prop('style');
+        for (let field in props) {
+            properties.addProp(field, $(this).css(field));
+        }
+       */
+        
+       let props = getComputedStyle(this[0]);
+       for (let field in props) {
+           properties.addProp(field, props.getPropertyValue(field));
+       }
         return $(this);
     }
 
@@ -196,28 +198,22 @@ $(function() {
     $(document).on('mouseover', '.rowx, .colx', function(ev) {      
         ev.stopPropagation();
         if (isDragOn || isResizeOn) return;
+        console.log("i am here");
         if (hoveredItem != null) {
             hoveredItem.setHovered(false);
             if (hoveredItem.is(selected)) selected.setSelected(true);
         }
         hoveredItem = $(this);
         hoveredItem.setHovered(true);
-    }).on('mouseout', '.corner-bar', function(ev) {
-        if (selected != null) selected.setSelectedStyle();
-        ev.stopPropagation();
-        if (isDragOn || isResizeOn) return;
-        if (hoveredItem != null) {
-            hoveredItem.setHovered(false);
-            if(hoveredItem.is(selected)) hoveredItem.setSelectedStyle();
-        }
-        hoveredItem = null;
     }).on('mouseover', '.lastrow, .lastcol', function(ev) {
         ev.stopPropagation();
         if (isDragOn || isResizeOn) return;
+        console.log("i am here");
         if (hoveredItem !== null) hoveredItem.setNormalStyle();
         hoveredItem = $(this).parent().setHoverStyle();
     }).on('mouseout', '.lastrow, .lastcol', function(ev) {
         ev.stopPropagation();
+        console.log("i am here");
         if (isDragOn || isResizeOn) return;
         if (hoveredItem !== null) hoveredItem.setNormalStyle();
         hoveredItem = null;
