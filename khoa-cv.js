@@ -26,4 +26,19 @@ $(function() {
             targetStyles: ['*']
             })
     })
+
+    $("#save").on('click', function(ev) {  
+        let obj = {name: "khoa", age: "8"};  
+        let json = JSON.stringify(obj);
+        var blob = new Blob([json], {type: "applicaton/json;charset=utf-8"});
+        saveAs(blob, "cv_data.json");
+    })
+
+    $("#fileDialog").change(function(ev) {
+        console.log($(this).val());
+    })
+
+    $("#load").click(function(ev) {
+        $("#fileDialog").trigger('click');
+    })
 })

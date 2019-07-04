@@ -9,7 +9,8 @@ $(function() {
                     , 'border', 'borderLeft', 'borderRight', 'borderTop', 'borderBottom'
                     , 'backgroundColor','backgroundImage', 'backgroundPosition', 'backgroundRepeat', 'backgroundSize'
                     , 'margin', 'padding', 'width', 'height'];
-    properties = $('#properties').hide();
+    let propertyContainer = $('#properties-container').hide();
+    let textContainer = $('#text-container').hide();
 
     $.fn.isRow = function () { return $(this).hasClass("rowxtend") || $(this).hasClass("lastrow"); };
     $.fn.isCol = function() { return $(this).hasClass("colxtend") || $(this).hasClass("lastcol") };
@@ -111,48 +112,67 @@ $(function() {
         }
     });
     
+    $.fn.getItemFromProp = function(type) {
+        if (type === 'text-content') {
+            let span = selected.children('span');
+            if (span.length === 1) return $(span[0]);
+        }
+        return this;
+    }
+
     var prop = {name: null, editor: null};
     $(document).on('focus', '.property-value', function(event) {
         prop = {name: $(this).prev().attr("title"), editor: $(this)};
-        selected.css('max-width', selected.css('width'));
+        selected.getItemFromProp($(this).attr('type')).css('max-width', selected.css('width'));       
     }).on('change', '.property-value', function(event) {
-        let newValue = $(this).val();
-        if ($(this).hasClass('jscolor')) 
-            selected.css(prop.name, '#' + newValue);
+        let newValue = $(this).val();        
+        let item = selected.getItemFromProp($(this).attr('type'));
+        if ($(this).hasClass('jscolor'))             
+            item.css(prop.name, '#' + newValue);
         else 
-            selected.css(prop.name, newValue);
+            item.selected.css(prop.name, newValue);
     }).on('blur', '.property-value', function(event) {
-        prop.editor.text(selected.children("span.text").css(prop.name));
+        let item = selected.getItemFromProp($(this).attr('type'));
+        prop.editor.text(item.css(prop.name));
         prop = {name: null, editor: null};
     })
 
-    $.fn.addProp = function(field, value) {
+    $.fn.addProp = function(field, value, type = 'this') {
         if (!isNaN(parseInt(field)) || typeof(value) !== "string") return this;
         let li = $.new('li', "list-group-item  list-group-item-primary property");
-        let name = $.new('div', "property-name").attr("data-toggle","tooltip").attr("title", field).html(field);
+        let name = $.new('div', "property-name").attr("data-toggle","tooltip").attr("title", field).html(field).attr('type', type);
         let content = $.new('input', "property-value").attr('value', value);
-        if (field.toLowerCase().indexOf('color') > -1) content = $.new('input', "property-value jscolor").attr('value', value);
+        if (field.toLowerCase().indexOf('color') > -1) content = $.new('input', "property-value jscolor").attr('value', value).attr('type', type);
         return $(this).append(li.append(name).append(content));
     }
 
     $.fn.showProps = function() {
-        properties.empty();
+        propertyContainer.empty();
+        textContainer.empty();
         /*
         for (let field of propList) {
             properties.addProp(field, $(this).css(field));
         }
         */
-       /*
+        /*
         let props = $(this).prop('style');
         for (let field in props) {
             properties.addProp(field, $(this).css(field));
         }
-       */
+        */
         
-       let props = getComputedStyle(this[0]);
-       for (let field in props) {
-           properties.addProp(field, props.getPropertyValue(field));
-       }
+        let props = getComputedStyle(this[0]);
+        for (let field in props) {
+            propertyContainer.addProp(field, props.getPropertyValue(field), "container");
+        }
+
+        let span = $(this).children('span');
+        if (span.length == 1) {
+            props = getComputedStyle(span[0]);
+            for (let field in props) {
+                textContainer.addProp(field, props.getPropertyValue(field), "text-content");
+            }
+        }
         return $(this);
     }
 
@@ -171,7 +191,8 @@ $(function() {
         $(this).setNormalStyle();
         $(this).focusout();
         $(this).children('span').attr('contenteditable', 'false');
-        properties.hide();
+        propertyContainer.hide();
+        textContainer.hide();
         return null;
     }
     
@@ -180,7 +201,8 @@ $(function() {
         if ($(this).is(selected)) {
             selected.setNormalStyle();
             selected.children('span').attr('contenteditable', 'false');
-            properties.hide();
+            propertyContainer.hide();
+            textContainer.hide();
             selected = null;
         } else {         
             if (selected != null) {
@@ -188,7 +210,8 @@ $(function() {
             }
             selected = $(this).setSelectedStyle().showProps();
             selected.focus();
-            properties.show();
+            propertyContainer.show();
+            textContainer.show();
             jscolor.installByClassName('jscolor');
             selected.children('span').attr('contenteditable', 'true');
             selected.children('span').focus();

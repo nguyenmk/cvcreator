@@ -85,7 +85,7 @@
   position:absolute
 }
 
-#properties {
+#properties-container, #text-container {
   width: 350px;
 }
 

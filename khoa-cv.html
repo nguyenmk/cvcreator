@@ -343,15 +343,22 @@
                         <i class="material-icons" id="print" style="cursor:pointer;">
                                 print
                         </i>
-                        <i class="material-icons">
+                        <input type="file" id="fileDialog" style="display: none" />
+                        <i class="material-icons" id="save">
                             save
                         </i>
-                        <i class="material-icons">
+                        
+                        <i class="material-icons" id="load">
                             folder_open
+                            
                         </i>
                     </div>
                     <div class="row">
-                        <ul id = "properties" class="list-group" style="overflow-y: scroll; height:400px">
+                        <div> Container properties </div>
+                        <ul id = "properties-container" class="list-group" style="overflow-y: scroll; height:400px">                            
+                        </ul>
+                        <div> Container text </div>
+                        <ul id = "text-container" class="list-group" style="overflow-y: scroll; height:400px">                            
                         </ul>
                     </div>
                 <td>
@@ -364,6 +371,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <!--     print.JS -->
     <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script> 
+    <script src="FileSaver.min.js"></script>
     <script src="jscolor.js"></script>
     <script src="khoa-cv.js"></script>
     <script src="cv.js"></script>
