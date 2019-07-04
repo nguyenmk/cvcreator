@@ -11,8 +11,8 @@ $(function() {
                     , 'margin', 'padding', 'width', 'height'];
     properties = $('#properties').hide();
 
-    $.fn.isRow = function () { return $(this).hasClass("rowx") || $(this).hasClass("lastrow"); };
-    $.fn.isCol = function() { return $(this).hasClass("colx") || $(this).hasClass("lastcol") };
+    $.fn.isRow = function () { return $(this).hasClass("rowxtend") || $(this).hasClass("lastrow"); };
+    $.fn.isCol = function() { return $(this).hasClass("colxtend") || $(this).hasClass("lastcol") };
 
     $.fn.setBO = function(border, opacity) { //border and opacity
         (border !== undefined)? $(this).css('border', border) : $(this).css('border', '');
@@ -41,14 +41,14 @@ $(function() {
     }
 
     $.fn.appendLast = function() {
-        if ($(this).children(".colx, .rowx").length > 0) {
+        if ($(this).children(".colxtend, .rowxtend").length > 0) {
             ($(this).isCol()) ? $(this).append($.new('div', "lastrow")): $(this).append($.new('div',"lastcol"));
         }
         return this;
     }
 
      // append last column or row
-    $(".rowx, .colx").each(function() { $(this).appendLast(); });
+    $(".rowxtend, .colxtend").each(function() { $(this).appendLast(); });
 
     $.fn.closestParent = function(selector) {
         return $(this).parent().closest(selector);
@@ -61,16 +61,16 @@ $(function() {
             $child = $parent;
             $parent = $child.parent();
             if (!$parent.isCol() && !$parent.isRow()) break;
-        } while ($parent.children(".colx:not(.ui-draggable-dragging), .rowx:not(.ui-draggable-dragging)").length <= 1)
+        } while ($parent.children(".colxtend:not(.ui-draggable-dragging), .rowxtend:not(.ui-draggable-dragging)").length <= 1)
         return $child;
     }
 
     $.fn.getContainerDown = function() {
         let $parent = $(this);
-        let $children = $parent.children(".colx:not(.ui-draggable-dragging), .rowx:not(.ui-draggable-dragging)");
+        let $children = $parent.children(".colxtend:not(.ui-draggable-dragging), .rowxtend:not(.ui-draggable-dragging)");
         while ($children.length == 1) {
             $parent = $children.eq(0);
-            $children = $parent.children(".colx:not(.ui-draggable-dragging):not(.handler-wrapper-c), .rowx:not(.ui-draggable-dragging)");
+            $children = $parent.children(".colxtend:not(.ui-draggable-dragging):not(.handler-wrapper-c), .rowxtend:not(.ui-draggable-dragging)");
         }
         return $parent;
     }
@@ -89,7 +89,7 @@ $(function() {
         return this;
     }
 
-    $(".rowx, .lastrow, .colx, .lastcol").each(function() { $(this).prependHandler(false); });
+    $(".rowxtend, .lastrow, .colxtend, .lastcol").each(function() { $(this).prependHandler(false); });
 
     var isDragOn = false;
     var hovered = null;
@@ -164,61 +164,99 @@ $(function() {
             $(this).setNormalStyle();
         }
     }
+
     var selected = null;
 
-    $(document).on("mousedown", ".colx, .rowx", function(ev){
-        ev.stopPropagation();
-                
+    $.fn.deselect = function() {
+        $(this).setNormalStyle();
+        $(this).focusout();
+        $(this).children('span').attr('contenteditable', 'false');
+        properties.hide();
+        return null;
+    }
+    
+    var editMode = true;
+    $(document).on("click", ".rowxtend, .colxtend", function(ev){        
         if ($(this).is(selected)) {
             selected.setNormalStyle();
             selected.children('span').attr('contenteditable', 'false');
             properties.hide();
             selected = null;
-            console.log(selected);
-        } else {
-            if (selected != null) selected.setNormalStyle();
+        } else {         
+            if (selected != null) {
+                selected = selected.deselect();
+            }
             selected = $(this).setSelectedStyle().showProps();
+            selected.focus();
             properties.show();
             jscolor.installByClassName('jscolor');
-            console.log(selected);
             selected.children('span').attr('contenteditable', 'true');
             selected.children('span').focus();
-        }        
-        console.log("mousedown .colx, .rowx, isDragOn: ", isDragOn);
+        } 
+        ev.stopPropagation();
+    })
+
+    $(document).keydown(function(ev) {
+        if (ev.which === 27) {
+            selected = selected.deselect();
+        }
     })
 
     $.fn.setHovered = function (isHovered) {
         if (isHovered === true) {
             $(this).setHoverStyle();
-           // $(this).children('.corner-bar').css('visibility', 'visible');
         } else {
             $(this).setNormalStyle();
-           // $(this).children('.corner-bar').css('visibility', 'hidden');
         }
     }
 
     let hoveredItem = null;
     
-    // handle hover event on .rowx or .colx and .lastrow, .lastcol
-    $(document).on('mouseover', '.rowx, .colx', function(ev) {      
-        ev.stopPropagation();
-        if (isDragOn || isResizeOn || selected !== null) return;
-        if (hoveredItem != null) {
-            hoveredItem.setHovered(false);
-            if (hoveredItem.is(selected)) selected.setSelected(true);
+    // handle hover event on .rowxtend or .colxtend and .lastrow, .lastcol
+    $(document).on('mouseover', '*', function(ev) {     
+        ev.stopPropagation(); 
+        if ($(this).hasClass('rowxtend') || $(this).hasClass('colxtend')) {
+            console.log('rowcol', $(this));
+            console.log('rowcol closest', $(this).closest('[class*="xtend"]'));
+            console.log('rowcol selected', selected);
+
+            if (isDragOn || isResizeOn || $(this).closest('[class*="xtend"]').is(selected)) return;
+            if (hoveredItem != null) {
+                hoveredItem.setHovered(false);
+                if (hoveredItem.is(selected)) selected.setSelected(true);
+            }
+            hoveredItem = $(this);
+            hoveredItem.setHovered(true);
+            console.log("setHovered", $(this));
+        } else if ($(this).hasClass('lastrow') || $(this).hasClass('lastcol')) {
+            console.log('lastrowcol', $(this));
+            console.log('lastrowcol closest', $(this).closest('[class*="xtend"]'));
+            console.log('lastrowcol selected', selected);
+
+            if (isDragOn || isResizeOn) return;
+            if ($(this).closest('[class*="xtend"]').is(selected)) return;
+            if (hoveredItem !== null) hoveredItem.setNormalStyle();
+            hoveredItem = $(this).parent().setHoverStyle();            
+        } else {
+            console.log('other', $(this));
+            console.log('other closest', $(this).closest('[class*="xtend"]'));
+            console.log('other selected', selected);
+            console.log('other is closest selected', $(this).closest('[class*="xtend"]').is(selected));
+            console.log('other hover', hoveredItem);
+            if (isDragOn || isResizeOn) return;
+            let parent = $(this).closest('[class*="xtend"]');
+            if (parent !== null) {
+                if (!parent.is(selected)) {
+                    if (hoveredItem !== null) hoveredItem.setNormalStyle();
+                    hoveredItem = parent;
+                    hoveredItem.setHovered(true);
+                } else {
+                    if (hoveredItem !== null) hoveredItem.setNormalStyle();
+                    hoveredItem = null;
+                    selected.setSelected(true);
+                }
+            }
         }
-        hoveredItem = $(this);
-        hoveredItem.setHovered(true);
-    }).on('mouseover', '.lastrow, .lastcol', function(ev) {
-        ev.stopPropagation();
-        if (isDragOn || isResizeOn || selected !== null) return;
-        if (hoveredItem !== null) hoveredItem.setNormalStyle();
-        hoveredItem = $(this).parent().setHoverStyle();
-    }).on('mouseout', '.lastrow, .lastcol', function(ev) {
-        ev.stopPropagation();
-        if (isDragOn || isResizeOn || selected !== null) return;
-        if (hoveredItem !== null) hoveredItem.setNormalStyle();
-        hoveredItem = null;
     })
     
 
@@ -226,12 +264,12 @@ $(function() {
     $.fn.createWrapper = function($target) {
         let $newItem = $(this);
         if ($target.isCol() && $newItem.isRow()) {
-            let $col = $.new('div', "colx").prependHandler().makeDraggable().makeResizable();
+            let $col = $.new('div', "colxtend").prependHandler().makeDraggable().makeResizable();
             $col.append($newItem).appendLast();
             $col.children().last().prependHandler();
             $newItem = $col;
         } else if ($target.isRow() && $newItem.isCol()) {
-            let $row = $.new('div', "rowx").prependHandler().makeDraggable().makeResizable();
+            let $row = $.new('div', "rowxtend").prependHandler().makeDraggable().makeResizable();
             $row.append($newItem).appendLast();
             $row.children().last().prependHandler();   
             $newItem = $row;
@@ -258,18 +296,22 @@ $(function() {
             delay: 300,
             //containment:$(this).closest('.componentx'),
             start: function(event, ui) {
+                event.stopPropagation();
                 $(this).data("width", $(this).width()).data("height",$(this).height());            
                 isDragOn = true;
                 $(this).setHoverStyle();
                 ui.helper.setHoverStyle();
-                console.log("dragStart .colx, .rowx, isDragOn: ", isDragOn);
+                console.log("dragStart ", $(this));
+                
             },
             drag: function(event, ui) {
+                event.stopPropagation();
                 ui.helper.width($(this).data("width")).height($(this).data("height"));
-                console.log("dragging .colx, .rowx, isDragOn: ", isDragOn);
+                console.log("dragging ", $(this));
+                
             },
             stop: function(event, ui) {    
-                console.log("dragStop .colx, .rowx, isDragOn: ", isDragOn);
+                console.log("dragStop .colxtend, .rowxtend, isDragOn: ", isDragOn);
                 $(this).setNormalStyle().setSelectedStyle();
                 isDragOn = false;
                 if (hovered == null) return;
@@ -284,7 +326,7 @@ $(function() {
                 
                 $dragged.insertBefore(hovered);
                 if (!$container.is($contained)) $container.remove();
-                if ($containerParent.children(".colx:not(.ui-draggable-dragging):not(.handler-wrapper-c), .rowx:not(.ui-draggable-dragging)").length <= 1)
+                if ($containerParent.children(".colxtend:not(.ui-draggable-dragging):not(.handler-wrapper-c), .rowxtend:not(.ui-draggable-dragging)").length <= 1)
                     $containerParent.simplify();
                 
                 selected = $dragged.setSelectedStyle();
@@ -294,7 +336,7 @@ $(function() {
         return this;
     }
 
-    $(".colx, .rowx").makeDraggable();
+    $(".colxtend, .rowxtend").makeDraggable();
     
     $.fn.makeResizable = function() {
         $(this).resizable({     
@@ -310,7 +352,7 @@ $(function() {
         return this;
     }
 
-    $(".colx").makeResizable();
+    $(".colxtend").makeResizable();
     
 });
 

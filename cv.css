@@ -2,17 +2,17 @@
   display: table;
 }
 
-.rowx {
+.rowxtend {
   display: flex;
   flex-wrap: wrap;
 }
-.colx {
+.colxtend {
   display: table-cell;
   padding-right: 2px;
   margin: 2px;
 }
 
-.containerx.rowx, .containerx.colx {
+.containerx.rowxtend, .containerx.colxtend {
   display: table;
 }
 
@@ -20,7 +20,7 @@
   pointer-events: none;
 }
 
-.rowx, .colx, .lastrow, .lastcol {
+.rowxtend, .colxtend, .lastrow, .lastcol {
   position: relative;
   left: 0;
   top: 0;
@@ -133,7 +133,7 @@
 }
 
 /*
-.colx, .rowx {
+.colxtend, .rowxtend {
   border: 1px solid;
 }
 */
