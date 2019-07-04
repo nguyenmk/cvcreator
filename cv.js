@@ -21,8 +21,8 @@ $(function() {
     }
 
     $.fn.setSelectedStyle = function() {       
-        //return $(this).setBO('1px solid'); 
-        return $(this).setBO(); 
+        return $(this).setBO('1px solid'); 
+        //return $(this).setBO(); 
     }
     
     $.fn.setHoverStyle = function() {     
@@ -166,19 +166,38 @@ $(function() {
     }
     var selected = null;
 
-    
     $(document).on("mousedown", ".colx, .rowx", function(ev){
         ev.stopPropagation();
+        /*
         if ($(this).is(selected)) {
             selected.setNormalStyle();
             properties.hide();
             selected = null;
+            console.log(selected);
         } else {
             if (selected != null) selected.setNormalStyle();
             selected = $(this).setSelectedStyle().showProps();
             properties.show();
             jscolor.installByClassName('jscolor');
+            console.log(selected);
         }
+        */
+        console.log("mousedown .colx, .rowx, isDragOn: ", isDragOn);
+    }).on("mouseup", ".colx, .rowx", function(ev) {
+        ev.stopPropagation();
+        if ($(this).is(selected)) {
+            selected.setNormalStyle();
+            properties.hide();
+            selected = null;
+            console.log(selected);
+        } else {
+            if (selected != null) selected.setNormalStyle();
+            selected = $(this).setSelectedStyle().showProps();
+            properties.show();
+            jscolor.installByClassName('jscolor');
+            console.log(selected);
+        }
+        console.log("mouseup .colx, .rowx, isDragOn: ", isDragOn);
     })
     
 
@@ -197,8 +216,7 @@ $(function() {
     // handle hover event on .rowx or .colx and .lastrow, .lastcol
     $(document).on('mouseover', '.rowx, .colx', function(ev) {      
         ev.stopPropagation();
-        if (isDragOn || isResizeOn) return;
-        console.log("i am here");
+        if (isDragOn || isResizeOn || selected !== null) return;
         if (hoveredItem != null) {
             hoveredItem.setHovered(false);
             if (hoveredItem.is(selected)) selected.setSelected(true);
@@ -207,14 +225,12 @@ $(function() {
         hoveredItem.setHovered(true);
     }).on('mouseover', '.lastrow, .lastcol', function(ev) {
         ev.stopPropagation();
-        if (isDragOn || isResizeOn) return;
-        console.log("i am here");
+        if (isDragOn || isResizeOn || selected !== null) return;
         if (hoveredItem !== null) hoveredItem.setNormalStyle();
         hoveredItem = $(this).parent().setHoverStyle();
     }).on('mouseout', '.lastrow, .lastcol', function(ev) {
         ev.stopPropagation();
-        console.log("i am here");
-        if (isDragOn || isResizeOn) return;
+        if (isDragOn || isResizeOn || selected !== null) return;
         if (hoveredItem !== null) hoveredItem.setNormalStyle();
         hoveredItem = null;
     })
@@ -253,18 +269,21 @@ $(function() {
             //handle: $(this).children(".corner-bar"),
             helper: "clone",
             opacity: 0.34,
+            delay: 300,
             //containment:$(this).closest('.componentx'),
             start: function(event, ui) {
                 $(this).data("width", $(this).width()).data("height",$(this).height());            
                 isDragOn = true;
                 $(this).setHoverStyle();
                 ui.helper.setHoverStyle();
+                console.log("dragStart .colx, .rowx, isDragOn: ", isDragOn);
             },
             drag: function(event, ui) {
                 ui.helper.width($(this).data("width")).height($(this).data("height"));
+                console.log("dragging .colx, .rowx, isDragOn: ", isDragOn);
             },
             stop: function(event, ui) {    
-                
+                console.log("dragStop .colx, .rowx, isDragOn: ", isDragOn);
                 $(this).setNormalStyle().setSelectedStyle();
                 isDragOn = false;
                 if (hovered == null) return;
