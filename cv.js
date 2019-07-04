@@ -171,6 +171,7 @@ $(function() {
                 
         if ($(this).is(selected)) {
             selected.setNormalStyle();
+            selected.children('span').attr('contenteditable', 'false');
             properties.hide();
             selected = null;
             console.log(selected);
@@ -180,6 +181,8 @@ $(function() {
             properties.show();
             jscolor.installByClassName('jscolor');
             console.log(selected);
+            selected.children('span').attr('contenteditable', 'true');
+            selected.children('span').focus();
         }        
         console.log("mousedown .colx, .rowx, isDragOn: ", isDragOn);
     })

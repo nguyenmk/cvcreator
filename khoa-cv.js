@@ -1,5 +1,5 @@
 $(function() {
-    $("span").attr('contenteditable', 'true');
+
     $(".exp-to-data").each(function() {
         if ($(this).text() !== "") {
             $(this).text(' - ' + $(this).text());
