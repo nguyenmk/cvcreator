@@ -168,7 +168,7 @@ $(function() {
 
     $(document).on("mousedown", ".colx, .rowx", function(ev){
         ev.stopPropagation();
-        /*
+                
         if ($(this).is(selected)) {
             selected.setNormalStyle();
             properties.hide();
@@ -180,26 +180,9 @@ $(function() {
             properties.show();
             jscolor.installByClassName('jscolor');
             console.log(selected);
-        }
-        */
+        }        
         console.log("mousedown .colx, .rowx, isDragOn: ", isDragOn);
-    }).on("mouseup", ".colx, .rowx", function(ev) {
-        ev.stopPropagation();
-        if ($(this).is(selected)) {
-            selected.setNormalStyle();
-            properties.hide();
-            selected = null;
-            console.log(selected);
-        } else {
-            if (selected != null) selected.setNormalStyle();
-            selected = $(this).setSelectedStyle().showProps();
-            properties.show();
-            jscolor.installByClassName('jscolor');
-            console.log(selected);
-        }
-        console.log("mouseup .colx, .rowx, isDragOn: ", isDragOn);
     })
-    
 
     $.fn.setHovered = function (isHovered) {
         if (isHovered === true) {
