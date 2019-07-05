@@ -4,11 +4,51 @@
 //document.getElementById("Move").ondragover = handleDragOver;
 
 $(function() {
-  
-    let propList = [ 'color', 'font', 'fontFamily', 'fontSize', 'fontStyle', 'textAlign'
-                    , 'border', 'borderLeft', 'borderRight', 'borderTop', 'borderBottom'
-                    , 'backgroundColor','backgroundImage', 'backgroundPosition', 'backgroundRepeat', 'backgroundSize'
-                    , 'margin', 'padding', 'width', 'height'];
+    
+    let propList = {
+        'background-color': 'color', 
+        'background-image': 'url', 
+        'background-position': 'field2', 
+        'background-repeat': 'field1', 
+        'background-size': 'field2',
+        
+        'border-top': 'field3', // (width, style, color)
+        'border-top-left-radius': 'length',
+        'border-top-right-radius': 'length',
+        
+        'border-bottom': 'field3',
+        'border-bottom-left-radius': 'length',
+        'border-bottom-right-radius': 'length',
+        
+        'border-left': 'field3',
+        'border-right': 'field3',
+                   
+        'margin': 'field4', 
+        'padding': 'field4', 
+        'width': 'length', 
+        'height': 'length', 
+        'left': 'length',  
+        'top': 'length',  
+        'right': 'length',  
+        'bottom': 'length', 
+        
+        'color': 'color', 
+        'opacity': 'scalar', 
+        'white-space': 'length', 
+        'word-spacing': 'length', 
+        'direction': 'field1', 
+        'line-height': 'length',
+        'font-family': 'textArray', 
+        'font-size': 'length', 
+        'font-style': 'field1', 
+        'font-weight': 'field1',
+        'text-align': 'field1', 
+        'text-indent': 'field1', 
+        'text-shadow': 'mixed', 
+        'text-transform': 'mixed',    
+    };
+    
+
     let propertyContainer = $('#properties-container').hide();
     let textContainer = $('#text-container').hide();
 
@@ -16,7 +56,7 @@ $(function() {
     $.fn.isCol = function() { return $(this).hasClass("colxtend") || $(this).hasClass("lastcol") };
 
     $.fn.setBO = function(border, opacity) { //border and opacity
-        (border !== undefined)? $(this).css('border', border) : $(this).css('border', '');
+        (border !== undefined)? $(this).css('outline', border) : $(this).css('outline', '');
         (opacity !== undefined) ? $(this).css('opacity', opacity) : $(this).css('opacity', '');
         return this;
     }
@@ -42,14 +82,12 @@ $(function() {
     }
 
     $.fn.appendLast = function() {
-        if ($(this).children(".colxtend, .rowxtend").length > 0) {
-            ($(this).isCol()) ? $(this).append($.new('div', "lastrow")): $(this).append($.new('div',"lastcol"));
-        }
+        ($(this).isCol()) ? $(this).parent().append($.new('div', "lastcol")): $(this).parent().append($.new('div',"lastrow"));
         return this;
     }
 
      // append last column or row
-    $(".rowxtend, .colxtend").each(function() { $(this).appendLast(); });
+    $("div.rowxtend:last-of-type, div.colxtend:last-of-type").each(function() { $(this).appendLast(); });
 
     $.fn.closestParent = function(selector) {
         return $(this).parent().closest(selector);
@@ -97,14 +135,14 @@ $(function() {
     var isResizeOn = false;
 
     // handle hover event on handler wrappers
-    $(document).on('mouseover','[class|="handler-wrapper"], .lastcol, .lastrow', function(ev){
+    $(document).on('mouseenter','[class|="handler-wrapper"], .lastcol, .lastrow', function(ev){
         ev.stopPropagation();
         if (isDragOn) {
             if ($(this).hasClass('lastrow') || $(this).hasClass('lastcol')) hovered = $(this);            
             else hovered = $(this).parent();
             $(this).find('[class|="handler-symbol"]').css("display", "block");
         }
-    }).on('mouseout','[class|="handler-wrapper"], .lastcol, .lastrow', function(ev) {
+    }).on('mouseleave','[class|="handler-wrapper"], .lastcol, .lastrow', function(ev) {
         ev.stopPropagation();
         if (isDragOn) {
             $(this).find('[class|="handler-symbol"]').css("display", "none");
@@ -124,13 +162,13 @@ $(function() {
     $(document).on('focus', '.property-value', function(event) {
         prop = {name: $(this).prev().attr("title"), editor: $(this)};
         selected.getItemFromProp($(this).attr('type')).css('max-width', selected.css('width'));       
-    }).on('change', '.property-value', function(event) {
+    }).on('input', '.property-value', function(event) {
         let newValue = $(this).val();        
         let item = selected.getItemFromProp($(this).attr('type'));
         if ($(this).hasClass('jscolor'))             
             item.css(prop.name, '#' + newValue);
         else 
-            item.selected.css(prop.name, newValue);
+            item.css(prop.name, newValue);
     }).on('blur', '.property-value', function(event) {
         let item = selected.getItemFromProp($(this).attr('type'));
         prop.editor.text(item.css(prop.name));
@@ -149,79 +187,63 @@ $(function() {
     $.fn.showProps = function() {
         propertyContainer.empty();
         textContainer.empty();
-        /*
-        for (let field of propList) {
-            properties.addProp(field, $(this).css(field));
-        }
-        */
-        /*
-        let props = $(this).prop('style');
-        for (let field in props) {
-            properties.addProp(field, $(this).css(field));
-        }
-        */
         
-        let props = getComputedStyle(this[0]);
-        for (let field in props) {
-            propertyContainer.addProp(field, props.getPropertyValue(field), "container");
+        for (let field in propList) {
+            propertyContainer.addProp(field, $(this).css(field), "container");
         }
-
         let span = $(this).children('span');
-        if (span.length == 1) {
-            props = getComputedStyle(span[0]);
-            for (let field in props) {
-                textContainer.addProp(field, props.getPropertyValue(field), "text-content");
+        if (span.length == 1) {            
+            for (let field in propList) {
+                textContainer.addProp(field, span.css(field), "text-content");
             }
         }
+
         return $(this);
     }
 
 
+    var editMode = false;
+
     $.fn.setSelected = function(isSelected) {
         if (isSelected == true) {
-            $(this).setSelectedStyle();
+            $(this).setSelectedStyle().showProps();
+            $(this).focus();
+            $(this).children('span').attr('contenteditable', 'true');
+            $(this).children('span').focus();
+            propertyContainer.show();
+            textContainer.show();
+            editMode = true;
+            $('.rowxtend, .colxtend').draggable({disabled: true});
+            return this;
         } else {
             $(this).setNormalStyle();
+            $(this).focusout();
+            $(this).children('span').attr('contenteditable', 'false');
+            propertyContainer.hide();
+            textContainer.hide();
+            editMode = false;
+            $('.rowxtend, .colxtend').draggable({disabled: false});
+            return null;
         }
     }
 
-    var selected = null;
+    var selected = null;   
 
-    $.fn.deselect = function() {
-        $(this).setNormalStyle();
-        $(this).focusout();
-        $(this).children('span').attr('contenteditable', 'false');
-        propertyContainer.hide();
-        textContainer.hide();
-        return null;
-    }
-    
-    var editMode = true;
-    $(document).on("click", ".rowxtend, .colxtend", function(ev){        
-        if ($(this).is(selected)) {
-            selected.setNormalStyle();
-            selected.children('span').attr('contenteditable', 'false');
-            propertyContainer.hide();
-            textContainer.hide();
-            selected = null;
-        } else {         
+    $(document).on("mousedown", ".rowxtend, .colxtend", function(ev){   
+        if (isDragOn || isResizeOn) return;
+        if (!$(this).is(selected)) {      
             if (selected != null) {
-                selected = selected.deselect();
+                selected = selected.setSelected(false);
             }
-            selected = $(this).setSelectedStyle().showProps();
-            selected.focus();
-            propertyContainer.show();
-            textContainer.show();
+            selected = $(this).setSelected(true);
             jscolor.installByClassName('jscolor');
-            selected.children('span').attr('contenteditable', 'true');
-            selected.children('span').focus();
         } 
         ev.stopPropagation();
     })
 
     $(document).keydown(function(ev) {
         if (ev.which === 27) {
-            selected = selected.deselect();
+            if (selected) selected = selected.setSelected(false);
         }
     })
 
@@ -237,12 +259,9 @@ $(function() {
     
     // handle hover event on .rowxtend or .colxtend and .lastrow, .lastcol
     $(document).on('mouseover', '*', function(ev) {     
+        if (editMode) return;
         ev.stopPropagation(); 
         if ($(this).hasClass('rowxtend') || $(this).hasClass('colxtend')) {
-            console.log('rowcol', $(this));
-            console.log('rowcol closest', $(this).closest('[class*="xtend"]'));
-            console.log('rowcol selected', selected);
-
             if (isDragOn || isResizeOn || $(this).closest('[class*="xtend"]').is(selected)) return;
             if (hoveredItem != null) {
                 hoveredItem.setHovered(false);
@@ -250,22 +269,12 @@ $(function() {
             }
             hoveredItem = $(this);
             hoveredItem.setHovered(true);
-            console.log("setHovered", $(this));
         } else if ($(this).hasClass('lastrow') || $(this).hasClass('lastcol')) {
-            console.log('lastrowcol', $(this));
-            console.log('lastrowcol closest', $(this).closest('[class*="xtend"]'));
-            console.log('lastrowcol selected', selected);
-
             if (isDragOn || isResizeOn) return;
             if ($(this).closest('[class*="xtend"]').is(selected)) return;
             if (hoveredItem !== null) hoveredItem.setNormalStyle();
             hoveredItem = $(this).parent().setHoverStyle();            
         } else {
-            console.log('other', $(this));
-            console.log('other closest', $(this).closest('[class*="xtend"]'));
-            console.log('other selected', selected);
-            console.log('other is closest selected', $(this).closest('[class*="xtend"]').is(selected));
-            console.log('other hover', hoveredItem);
             if (isDragOn || isResizeOn) return;
             let parent = $(this).closest('[class*="xtend"]');
             if (parent !== null) {
@@ -323,23 +332,19 @@ $(function() {
                 $(this).data("width", $(this).width()).data("height",$(this).height());            
                 isDragOn = true;
                 $(this).setHoverStyle();
-                ui.helper.setHoverStyle();
-                console.log("dragStart ", $(this));
-                
+                ui.helper.setHoverStyle();            
             },
             drag: function(event, ui) {
                 event.stopPropagation();
                 ui.helper.width($(this).data("width")).height($(this).data("height"));
-                console.log("dragging ", $(this));
-                
             },
             stop: function(event, ui) {    
-                console.log("dragStop .colxtend, .rowxtend, isDragOn: ", isDragOn);
-                $(this).setNormalStyle().setSelectedStyle();
                 isDragOn = false;
+                selected = $(this).setSelected(false);
                 if (hovered == null) return;
                 hovered.find('[class|="handler-symbol"]').css("display", "none");
                 if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
+                if ($(this).next().is(hovered)) return;
                 if (!$(this).closestParent('.componentx').is(hovered.closestParent('.componentx'))) return;
                 let $container = $(this).getContainerUp();
                 let $containerParent = $container.parent();
@@ -351,9 +356,7 @@ $(function() {
                 if (!$container.is($contained)) $container.remove();
                 if ($containerParent.children(".colxtend:not(.ui-draggable-dragging):not(.handler-wrapper-c), .rowxtend:not(.ui-draggable-dragging)").length <= 1)
                     $containerParent.simplify();
-                
-                selected = $dragged.setSelectedStyle();
-                
+
             }
         });
         return this;

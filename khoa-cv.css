@@ -184,3 +184,7 @@ p {
     margin-block-end: 1px;
 
 }
+
+#container-extra {
+    position: absolute;
+}

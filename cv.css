@@ -5,6 +5,7 @@
 .rowxtend {
   display: flex;
   flex-wrap: wrap;
+  padding-top: 0px;
 }
 .colxtend {
   display: table-cell;
@@ -60,7 +61,7 @@
 
 .lastrow .handler-wrapper-r, .lastrow .handler-symbol-r {
   position: absolute;
-  top: -10px;
+  top: 0px;
   left: -5px;
   height: 8px;
   width: 100%;
