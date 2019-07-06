@@ -1,20 +1,19 @@
 .rowxtend, .lastrowxtend {
   display: block;
-  padding-top: 2px;
+  padding-top: 4px;
 }
 
 .colxtend, .lastcolxtend {
   display: table-cell;
-  padding-right: 2px;
-  margin: 2px;
+  padding-left: 4px;
 }
 
 .lastcolxtend {
-  width: 10px;
+  width: 2px;
 }
 
 .lastrowxtend {
-  height: 10px;
+  height: 2px;
 }
 .ui-draggable-dragging {
   pointer-events: none;

@@ -52,11 +52,13 @@ $(function() {
         let props = {}
         for (let css of cssProperties) props[css] = $(this).css(css);
         $(this).data(name, props);
+        return this;
     }
 
     $.fn.load = function(name) {
         let data = $(this).data(name);
         for (let css in data) $(this).css(css, data[css]);
+        return this;
     }
 
     let propertyContainer = $('#properties-container').hide();
@@ -169,6 +171,8 @@ $(function() {
 
     $.fn.setSelected = function(isSelected) {
         if (isSelected == true) {
+            $(this).save('border-selected', ['border', 'outline']);
+            console.log("set selected true", $(this).data('border-selected'));
             $(this).setBO('1px solid').showProps().focus();
             ($(this).children('span')).attr('contenteditable', 'true').focus();
             propertyContainer.show();
@@ -177,7 +181,8 @@ $(function() {
             $('.rowxtend, .colxtend').draggable({disabled: true});
             return this;
         } else {
-            $(this).setBO().focusout();
+            console.log("set selected false", $(this).data('border-selected'));
+            $(this).load('border-selected').focusout();
             $(this).children('span').attr('contenteditable', 'false');
             propertyContainer.hide();
             textContainer.hide();
@@ -191,8 +196,10 @@ $(function() {
     $(document).on("mousedown", ".rowxtend, .colxtend", function(ev){   
         if (isDragOn || isResizeOn) return;
         if (!$(this).is(selected)) {      
+            console.log("mousedown selected");
             selected = selected.setSelected(false);
             selected = $(this).setSelected(true);
+            
             jscolor.installByClassName('jscolor');
         } 
         ev.stopPropagation();
@@ -203,15 +210,15 @@ $(function() {
     })
 
     // handle hover event on .rowxtend or .colxtend and .lastrowxtend, .lastcolxtend
-    $(document).on('mouseover', '.rowxtend, .colxtend, .lastrowxtend, .lastcolxtend', function(ev) {     
+    $(document).on('mouseover', '.rowxtend, .colxtend', function(ev) {     
         ev.stopPropagation(); 
         if (editMode || isResizeOn || isDragOn) return;
-        $(this).save("opacity", ["opacity"]);
-        $(this).css('opacity', '0.34');
-    }).on('mouseout', '.rowxtend, .colxtend, .lastrowxtend, .lastcolxtend', function(ev) {     
+        $(this).save("opacity-mouseover", ["opacity", "border"]);
+        $(this).css('opacity', '0.34').css('border', "1px solid blue");
+    }).on('mouseout', '.rowxtend, .colxtend', function(ev) {     
         ev.stopPropagation(); 
         if (editMode || isResizeOn || isDragOn) return;
-        $(this).load("opacity");
+        $(this).load("opacity-mouseover");
     })
     
 
@@ -249,6 +256,7 @@ $(function() {
     }
 
     var hovered = $();
+    var tol = 10; //tolerant is 10 px
     $.fn.makeDraggable = function () {
         $(this).draggable( {
             //handle: $(this).children(".corner-bar"),
@@ -272,14 +280,13 @@ $(function() {
                 let posY = ev.clientY;
                 hovered.load('hover-drag');
                 hovered = $.getHovered(posX, posY);
+                if (!hovered.closestParent(".componentx").is($(this).closestParent(".componentx"))) return;
                 if (hovered.length > 0) {
                     let coor = hovered[0].getBoundingClientRect();
-                    hovered.save('hover-drag', ['border-left', 'border-top', 'border-right', 'border-bottom']);
-                    if (posX < coor.left + 5 && hovered.isCol()) {
-                        hovered.css('border', '3px dotted black');
+                    hovered.save('hover-drag', ['border-left', 'border-top']);
+                    if (posX < coor.left + tol && hovered.isCol()) {
                         hovered.css('border-left', '3px dotted red');                        
-                    } else if (posY < coor.top + 5 && hovered.isRow()) {
-                        hovered.css('border', '3px dotted black');
+                    } else if (posY < coor.top + tol && hovered.isRow()) {
                         hovered.css('border-top', '3px dotted red');
                     }
                 }
@@ -292,15 +299,17 @@ $(function() {
                 let posY = ev.clientY;
 
                 hovered.load('hover-drag');
-                hovered = $.getHovered(posX, posY);                
+                hovered = $.getHovered(posX, posY);  
+                
+                if (!hovered.closestParent(".componentx").is($(this).closestParent(".componentx"))) return;
                 if (hovered.length > 0) {
                     let coor = hovered[0].getBoundingClientRect();
-                    if (posX >= coor.left + 5 && hovered.isCol() || posY >= coor.top + 5 && hovered.isRow()) {
-                        hovered = null;
+                    if (posX >= coor.left + tol && hovered.isCol() || posY >= coor.top + tol && hovered.isRow()) {
+                        hovered = $();
                     }
                 }
                 
-                if (hovered == null) return;
+                if (hovered.length === 0) return;
                 hovered.find('[class|="handler-symbol"]').css("display", "none");
                 if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
                 if ($(this).next().is(hovered)) return;
@@ -328,13 +337,16 @@ $(function() {
             //autoHide: true,
             start: function(event, ui) { 
                 $(this).save('outline-resize', ['outline']);
+                console.log("start resize", $(this).data('outline-resize'));
                 $(this).css('outline', '1px solid');
             },
             resize: function(event, ui) {            
                 ui.size.height = ui.originalSize.height;  //fix the height                 
             },
             stop: function(event, ui) {
-                //$(this).load('outline-resize');
+                console.log("stop resize", $(this).data('outline-resize'));
+                $(this).load('outline-resize');
+                selected = $(this).setSelected(false);
             }
         });
         return this;
