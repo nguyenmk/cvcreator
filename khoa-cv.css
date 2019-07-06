@@ -2,6 +2,7 @@
 .page {
     width: 21cm;
     height: 29.7cm;
+    padding-right: 7px;
     box-shadow: 0 0 20px rgba(0,0,0,.1);
     background-color: #fff;
 }
@@ -12,7 +13,7 @@
 
 .header {
     background-color: #406A8C;
-    padding: 38px 19px 19px 19px
+    padding: 19px 19px 19px 19px
 
 }
 

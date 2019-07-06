@@ -1,11 +1,11 @@
 .rowxtend, .lastrowxtend {
   display: block;
-  padding-top: 4px;
+  padding-top: 6px;
 }
 
 .colxtend, .lastcolxtend {
   display: table-cell;
-  padding-left: 4px;
+  padding-left: 2px;
 }
 
 .lastcolxtend {

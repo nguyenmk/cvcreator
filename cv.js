@@ -310,10 +310,8 @@ $(function() {
                 }
                 
                 if (hovered.length === 0) return;
-                hovered.find('[class|="handler-symbol"]').css("display", "none");
                 if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
                 if ($(this).next().is(hovered)) return;
-                if (!$(this).closestParent('.componentx').is(hovered.closestParent('.componentx'))) return;
                 let $container = $(this).getContainerUp();
                 let $containerParent = $container.parent();
                 let $contained = $(this).getContainerDown();
