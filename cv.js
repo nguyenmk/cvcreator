@@ -255,13 +255,12 @@ $(function() {
             helper: "clone",
             opacity: 0.34,
             delay: 300,
-            //containment:$(this).closest('.componentx'),
+            containment:$(this).closestParent('.componentx'),
             start: function(ev, ui) {
                 ev.stopPropagation();
                 $(this).data("width", $(this).width()).data("height",$(this).height()); 
                            
                 isDragOn = true;
-                $(this).save('hover-dragStart', ['outline', 'opacity']);
                 $(this).setBO('1px solid', '0.34');
                 ui.helper.setBO('1px solid', '0.34');
             },
@@ -275,10 +274,12 @@ $(function() {
                 hovered = $.getHovered(posX, posY);
                 if (hovered.length > 0) {
                     let coor = hovered[0].getBoundingClientRect();
-                    hovered.save('hover-drag', ['border-left', 'border-top']);
+                    hovered.save('hover-drag', ['border-left', 'border-top', 'border-right', 'border-bottom']);
                     if (posX < coor.left + 5 && hovered.isCol()) {
+                        hovered.css('border', '3px dotted black');
                         hovered.css('border-left', '3px dotted red');                        
                     } else if (posY < coor.top + 5 && hovered.isRow()) {
+                        hovered.css('border', '3px dotted black');
                         hovered.css('border-top', '3px dotted red');
                     }
                 }
@@ -298,7 +299,7 @@ $(function() {
                         hovered = null;
                     }
                 }
-                //$(this).load('hover-dragStart');
+                
                 if (hovered == null) return;
                 hovered.find('[class|="handler-symbol"]').css("display", "none");
                 if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
@@ -319,7 +320,7 @@ $(function() {
         return this;
     }
 
-    $(".colxtend, .rowxtend").makeDraggable();
+    $(".colxtend, .rowxtend").each(function() {$(this).makeDraggable();});
     
     $.fn.makeResizable = function() {
         $(this).resizable({     
@@ -339,7 +340,7 @@ $(function() {
         return this;
     }
 
-    $(".colxtend").makeResizable();
+    $(".colxtend").each(function() {$(this).makeResizable();});
     
 });
 
