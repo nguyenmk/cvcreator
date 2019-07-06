@@ -1,89 +1,28 @@
-.containerx {
-  display: table;
-}
-
-.rowxtend {
-  display: flex;
-  flex-wrap: wrap;
+.rowxtend, .lastrowxtend {
+  display: block;
   padding-top: 0px;
 }
-.colxtend {
+
+.colxtend, .lastcolxtend {
   display: table-cell;
   padding-right: 2px;
   margin: 2px;
 }
 
-.containerx.rowxtend, .containerx.colxtend {
-  display: table;
+.lastcolxtend {
+  width: 10px;
 }
 
+.lastrowxtend {
+  height: 10px;
+}
 .ui-draggable-dragging {
   pointer-events: none;
 }
 
-.rowxtend, .colxtend, .lastrow, .lastcol {
-  position: relative;
+.rowxtend, .colxtend, .lastrowxtend, .lastcolxtend {
   left: 0;
   top: 0;
-}
-
-.lastcol .handler-wrapper-c, .lastcol .handler-symbol-c {
-  position: absolute;
-  top: -2px;
-  left: -4px;
-  width: 8px;
-  height: 90%;
-}
-
-.handler-wrapper-c, .handler-symbol-c {
-  position: absolute;
-  height: 100%;
-}
-
-.handler-wrapper-c {
-  top: -8px;
-  left: -12px;
-  width: 10px;
-  font-size: 15px;
-}
-
-.handler-wrapper-c hr {
-  display:inline-block;
-  top: 2px;
-  left: 7px;
-  height:100%; 
-  position:absolute
-}
-
-.handler-symbol-c, .handler-symbol-r {
-  display:none;
-}
-
-.lastrow .handler-wrapper-r, .lastrow .handler-symbol-r {
-  position: absolute;
-  top: 0px;
-  left: -5px;
-  height: 8px;
-  width: 100%;
-}
-
-.handler-wrapper-r, .handler-symbol-r {
-  position: absolute;
-  width: 100%;
-}
-
-.handler-wrapper-r {
-  font-size: 15px;
-  top: -8px;
-  left: -10px;
-  height: 10px;
-}
-
-.handler-wrapper-r hr{
-  display:inline-block;
-  left: 10px;
-  width:100%; 
-  position:absolute
 }
 
 #properties-container, #text-container {
@@ -97,12 +36,12 @@
   margin: 0;
   padding: 0;
 }
+
 .property-name {  
   width: 100px;
   margin-right: 10px;
   margin-left: 10px;
   height: 20px;
-  /*word-wrap: break-word;*/
   overflow :hidden;
   white-space: nowrap;
   text-overflow: clip;
@@ -116,17 +55,6 @@
   font-size: 12px;
   height: 20px;
 }
-
-.text {
-  word-wrap: break-word;
-}
-
-.a4 {
-  height: 842px;
-  width: 595px;
-  border: 2px solid;
-}
-
 
 .ui-resizable-e {
   right: 3px;
