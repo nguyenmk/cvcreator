@@ -352,5 +352,35 @@ $(function() {
 
     $(".colxtend").each(function() {$(this).makeResizable();});
     
+ 
+    $.contextMenu({
+        selector: '.colxtend, .rowxtend',
+        callback: function(key, options) {
+            var m = "clicked: " + key;
+            console.log('contextmenu', this);
+            if (key === 'insert_before') {
+                let clone = $(this).clone(true, true);
+                clone.removeClass('context-menu-active');
+                clone.insertBefore($(this));
+                clone.setSelected(false);
+            } else if (key === 'insert_after') {
+                let clone = $(this).clone(true, true);
+                clone.removeClass('context-menu-active');
+                clone.insertAfter($(this));
+                clone.setSelected(false);
+            } else if (key === 'delete') {
+                $(this).remove();
+            }
+        },
+        items: {
+            "insert_before": {name: "Insert Before"},
+            "insert_after": {name: "Insert After"},
+            "delete": {name: "Delete", icon: "delete"},
+            "sep1": "---------",
+            "quit": {name: "Quit", icon: function(){
+                return 'context-menu-icon context-menu-icon-quit';
+            }}
+        }
+    });
 });
 
