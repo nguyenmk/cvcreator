@@ -161,7 +161,6 @@ $(function() {
 
 
     $(window).on("scroll", function(){
-        console.log('scrolling');
         $("#container-extra").css({
             "top": ($(window).scrollTop()) + "px",
             "left": ($(window).scrollLeft()) + "px"

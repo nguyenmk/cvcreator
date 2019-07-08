@@ -47,10 +47,14 @@ $(function() {
         'text-shadow': 'mixed', 
         'text-transform': 'mixed',    
     };
-    
-    $.fn.save = function(name, cssProperties) {
+
+    // set style and backup the one before it
+    $.fn.setStyle = function(name, stylePairs) {
         let props = {}
-        for (let css of cssProperties) props[css] = $(this).css(css);
+        for (let css in stylePairs) {
+            props[css] = $(this).css(css);
+            $(this).css(css, stylePairs[css]);
+        }
         $(this).data(name, props);
         return this;
     }
@@ -66,12 +70,6 @@ $(function() {
 
     $.fn.isRow = function () { return $(this).hasClass("rowxtend") || $(this).hasClass("lastrowxtend"); };
     $.fn.isCol = function() { return $(this).hasClass("colxtend") || $(this).hasClass("lastcolxtend") };
-
-    $.fn.setBO = function(border, opacity) { //border and opacity
-        (border !== undefined)? $(this).css('outline', border) : $(this).css('outline', '');
-        (opacity !== undefined) ? $(this).css('opacity', opacity) : $(this).css('opacity', '');
-        return this;
-    }
 
     $.new = function(elementName, className) {
         let str = '<' + elementName;
@@ -169,58 +167,59 @@ $(function() {
 
     var editMode = false;
 
+    var selected = $();
     $.fn.setSelected = function(isSelected) {
         if (isSelected == true) {
-            $(this).save('border-selected', ['border', 'outline']);
-            console.log("set selected true", $(this).data('border-selected'));
-            $(this).setBO('1px solid').showProps().focus();
+            $(this).load("opacity-mouseover");
+            $(this).setStyle('border-selected', {'outline': '1px solid'});
+            $(this).showProps().focus();
             ($(this).children('span')).attr('contenteditable', 'true').focus();
+            jscolor.installByClassName('jscolor');
             propertyContainer.show();
             textContainer.show();
             editMode = true;
             $('.rowxtend, .colxtend').draggable({disabled: true});
-            return this;
+            selected = this;            
         } else {
-            console.log("set selected false", $(this).data('border-selected'));
             $(this).load('border-selected').focusout();
             $(this).children('span').attr('contenteditable', 'false');
             propertyContainer.hide();
             textContainer.hide();
             editMode = false;
             $('.rowxtend, .colxtend').draggable({disabled: false});
-            return $();
+            selected = $();
         }
+        return this;
     }
 
-    var selected = $();
-    $(document).on("mousedown", ".rowxtend, .colxtend", function(ev){   
+    
+    $(document).on("mousedown", ".rowxtend, .colxtend", function(ev){ 
+        if (ev.which !== 1) return;
         if (isDragOn || isResizeOn) return;
         if (!$(this).is(selected)) {      
-            console.log("mousedown selected");
-            selected = selected.setSelected(false);
-            selected = $(this).setSelected(true);
+            selected.setSelected(false);
+            $(this).setSelected(true);
             
-            jscolor.installByClassName('jscolor');
+            
         } 
         ev.stopPropagation();
     })
 
     $(document).keydown(function(ev) {
-        if (ev.which === 27) selected = selected.setSelected(false);
+        if (ev.which === 27) selected.setSelected(false);
     })
 
+    var isContextMenuOn = false;
     // handle hover event on .rowxtend or .colxtend and .lastrowxtend, .lastcolxtend
     $(document).on('mouseover', '.rowxtend, .colxtend', function(ev) {     
         ev.stopPropagation(); 
         if (editMode || isResizeOn || isDragOn) return;
-        $(this).save("opacity-mouseover", ["opacity", "border"]);
-        $(this).css('opacity', '0.34').css('border', "1px solid blue");
+        $(this).setStyle("opacity-mouseover", {"opacity": '0.34', "border": '1px solid blue'});
     }).on('mouseout', '.rowxtend, .colxtend', function(ev) {     
         ev.stopPropagation(); 
-        if (editMode || isResizeOn || isDragOn) return;
+        if (editMode || isResizeOn || isDragOn || isContextMenuOn) return;
         $(this).load("opacity-mouseover");
     })
-    
 
     //create a wrapper with the target type around the object
     $.fn.createWrapper = function($target) {
@@ -259,7 +258,6 @@ $(function() {
     var tol = 10; //tolerant is 10 px
     $.fn.makeDraggable = function () {
         $(this).draggable( {
-            //handle: $(this).children(".corner-bar"),
             helper: "clone",
             opacity: 0.34,
             delay: 300,
@@ -269,8 +267,8 @@ $(function() {
                 $(this).data("width", $(this).width()).data("height",$(this).height()); 
                            
                 isDragOn = true;
-                $(this).setBO('1px solid', '0.34');
-                ui.helper.setBO('1px solid', '0.34');
+                $(this).setStyle('drag-start', {'outline':'1px solid', 'opacity':'0.34'});
+                ui.helper.setStyle('drag-start', {'outline':'1px solid', 'opacity':'0.34'});
             },
             drag: function(ev, ui) {
                 ev.stopPropagation();
@@ -283,18 +281,18 @@ $(function() {
                 if (!hovered.closestParent(".componentx").is($(this).closestParent(".componentx"))) return;
                 if (hovered.length > 0) {
                     let coor = hovered[0].getBoundingClientRect();
-                    hovered.save('hover-drag', ['border-left', 'border-top']);
                     if (posX < coor.left + tol && hovered.isCol()) {
-                        hovered.css('border-left', '3px dotted red');                        
+                        hovered.setStyle('hover-drag', {'border-left': '3px dotted red'});                        
                     } else if (posY < coor.top + tol && hovered.isRow()) {
-                        hovered.css('border-top', '3px dotted red');
+                        hovered.setStyle('hover-drag', {'border-top': '3px dotted red'});
                     }
                 }
             },
             stop: function(ev, ui) {    
                 isDragOn = false;
-                selected = $(this).setSelected(false);
-
+                $(this).load('drag-start');
+                $(this).setSelected(false);
+                
                 let posX = ev.clientX;
                 let posY = ev.clientY;
 
@@ -334,9 +332,7 @@ $(function() {
             handles: "e",
             //autoHide: true,
             start: function(event, ui) { 
-                $(this).save('outline-resize', ['outline']);
-                console.log("start resize", $(this).data('outline-resize'));
-                $(this).css('outline', '1px solid');
+                $(this).setStyle('outline-resize', {'outline': '1px solid'});
             },
             resize: function(event, ui) {            
                 ui.size.height = ui.originalSize.height;  //fix the height                 
@@ -344,7 +340,7 @@ $(function() {
             stop: function(event, ui) {
                 console.log("stop resize", $(this).data('outline-resize'));
                 $(this).load('outline-resize');
-                selected = $(this).setSelected(false);
+                $(this).setSelected(false);
             }
         });
         return this;
@@ -352,35 +348,45 @@ $(function() {
 
     $(".colxtend").each(function() {$(this).makeResizable();});
     
- 
+    
+    
     $.contextMenu({
         selector: '.colxtend, .rowxtend',
+        autoHide: true,
+        events: {
+            show: function() {
+                isContextMenuOn = true;
+            },
+            hide: function() {
+                $(this).load("opacity-mouseover");
+                isContextMenuOn = false;
+            }
+        },
         callback: function(key, options) {
-            var m = "clicked: " + key;
-            console.log('contextmenu', this);
             if (key === 'insert_before') {
                 let clone = $(this).clone(true, true);
                 clone.removeClass('context-menu-active');
+                clone.load("opacity-mouseover");
                 clone.insertBefore($(this));
-                clone.setSelected(false);
             } else if (key === 'insert_after') {
                 let clone = $(this).clone(true, true);
                 clone.removeClass('context-menu-active');
+                clone.load("opacity-mouseover");
                 clone.insertAfter($(this));
-                clone.setSelected(false);
             } else if (key === 'delete') {
                 $(this).remove();
             }
         },
         items: {
-            "insert_before": {name: "Insert Before"},
-            "insert_after": {name: "Insert After"},
+            "insert_before": {name: "Insert Before", icon: "add"},
+            "insert_after": {name: "Insert After", icon: "add"},
             "delete": {name: "Delete", icon: "delete"},
             "sep1": "---------",
             "quit": {name: "Quit", icon: function(){
                 return 'context-menu-icon context-menu-icon-quit';
             }}
         }
+
     });
 });
 
