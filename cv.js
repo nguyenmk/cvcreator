@@ -93,19 +93,18 @@ $(function() {
     $('div').on('mouseover', '.divider-row, .divider-col', function(ev) {
         ev.stopPropagation();
         console.log('mouseover');
-        if (!$(this).closestParent('.componentx').is(draggedItem.closestParent('.componentx'))) {
-            return;
-        } 
+        if (!$(this).closestParent('.componentx').is(draggedItem.closestParent('.componentx'))) return;
+        if ($(this).next().is(draggedItem) || $(this).prev().is(draggedItem)) return; 
         console.log('mouseover', 'pass test');
         $(this).setStyle('divider-hover', {'background-color':'red'});
-        $(this).next().setStyle('element-hover', {'border':'1px solid', 'opacity':'0.34'});
-        $(this).prev().setStyle('element-hover', {'border':'1px solid', 'opacity':'0.34'});
+        //$(this).next().setStyle('element-hover', {'border':'1px solid', 'opacity':'0.34'});
+        //$(this).prev().setStyle('element-hover', {'border':'1px solid', 'opacity':'0.34'});
         hovered = $(this);
     }).on('mouseout', '.divider-row, .divider-col', function(ev) {
         ev.stopPropagation();
         $(this).load('divider-hover');
-        $(this).next().load('element-hover');
-        $(this).prev().load('element-hover');
+        //$(this).next().load('element-hover');
+        //$(this).prev().load('element-hover');
         hovered = $();
     })
 
