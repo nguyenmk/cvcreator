@@ -1,29 +1,19 @@
-.rowxtend, .lastrowxtend {
+.rowxtend {
   display: block;
-  padding-top: 2px;
 }
 
-.lastrowxtend {
-  padding-top: 0px;
-}
-
-.colxtend, .lastcolxtend {
+.colxtend {
   display: table-cell;
-  padding-left: 1px;
 }
 
-.lastcolxtend {
-  width: 3x;
-}
-
-.lastrowxtend {
-  height: 3px;
-}
 .ui-draggable-dragging {
   pointer-events: none;
 }
 
-.rowxtend, .colxtend, .lastrowxtend, .lastcolxtend {
+.divider {
+  border: 1px solid;
+}
+.rowxtend, .colxtend {
   left: 0;
   top: 0;
 }

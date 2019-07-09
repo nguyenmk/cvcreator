@@ -13,18 +13,30 @@ $(function() {
     })
 
     $("#print").click(function() {
+ 
         let css =[];
         $('link[rel=stylesheet]').each(function(){ 
             css.push($(this).attr('href'));
         })
+
         printJS({
             printable: 'mainContainer',
             type:'html',
             css: css,
             scanStyles: true,
             showModal: true,
-            targetStyles: ['*']
-            })
+            targetStyles: ['*'],
+            onPrintDialogClose: function() { 
+                console.log('The print dialog was closed');
+            },
+            onLoadingStart: function() {
+                $('.page').setStyle('page',{'box-shadow': 'none'});
+            },
+            onLoadingEnd: function() {
+                $('.page').load('page');
+            }
+        })        
+
     })
 
     $.getData = function() {

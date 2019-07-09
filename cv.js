@@ -32,7 +32,8 @@ $(function() {
         'text-align': 'field1', 
         'text-indent': 'field1', 
         'text-shadow': 'mixed', 
-        'text-transform': 'mixed',    
+        'text-transform': 'mixed',
+        'vertical-align': 'field1',    
         'white-space': 'length', 
         'word-spacing': 'length',
     };
@@ -57,8 +58,8 @@ $(function() {
     let propertyContainer = $('#properties-container').hide();
     let textContainer = $('#text-container').hide();
 
-    $.fn.isRow = function () { return $(this).hasClass("rowxtend") || $(this).hasClass("lastrowxtend"); };
-    $.fn.isCol = function() { return $(this).hasClass("colxtend") || $(this).hasClass("lastcolxtend") };
+    $.fn.isRow = function () { return $(this).hasClass("rowxtend"); };
+    $.fn.isCol = function() { return $(this).hasClass("colxtend"); };
 
     $.new = function(elementName, className) {
         let str = '<' + elementName;
@@ -67,13 +68,41 @@ $(function() {
         return $(str);
     }
 
-    $.fn.appendLast = function() {
-        ($(this).isCol()) ? $(this).parent().append($.new('div', "lastcolxtend")): $(this).parent().append($.new('div',"lastrowxtend"));
-        return this;
+    $.fn.addDivider = function(isBefore = true) {
+        if ($(this).isCol()) {
+            if (isBefore)
+                $('<div class="divider" style="display: table-cell; width:4px;padding-left:1px;padding-right:1px"></div>').insertBefore($(this));
+            else
+                $('<div class="divider" style="display: table-cell; width:4px;padding-left:1px;padding-right:1px"></div>').insertAfter($(this));
+        } else if ($(this).isRow()) {
+            if (isBefore)
+                $('<div class="divider" style="display: block;height:2px;padding-top:1px;padding-bottom:1px"></div>').insertBefore($(this));
+            else 
+                $('<div class="divider" style="display: block;height:2px;padding-top:1px;padding-bottom:1px"></div>').insertAfter($(this));
+        }
     }
+    //append divider
+    $('.colxtend, .rowxtend').each(function() { $(this).addDivider(true); });
+    $('.colxtend:last-of-type, .rowxtend:last-of-type').each(function() { $(this).addDivider(false);})
+    var editMode = false;
+    var isResizeOn = false;
+    var isDragOn = false;
 
-     // append last column or row
-    $("div.rowxtend:last-of-type, div.colxtend:last-of-type").each(function() { $(this).appendLast(); });
+    $('.divider').on('mouseover', function(ev) {
+        ev.stopPropagation();
+        if (!isDragOn) return;
+        $(this).setStyle('divider-hover', {'background-color':'red'});
+        if ($(this).next().length > 0) $(this).next().setStyle('element-hover', {'border':'1px solid', 'opacity':'0.34'});
+        if ($(this).prev().length > 0) $(this).prev().setStyle('element-hover', {'border':'1px solid', 'opacity':'0.34'});
+        hovered = $(this);
+    }).on('mouseout', function(ev) {
+        ev.stopPropagation();
+        if (!isDragOn) return;
+        $(this).load('divider-hover');
+        if ($(this).next().length > 0) $(this).next().load('element-hover');
+        if ($(this).prev().length > 0) $(this).prev().load('element-hover');
+        hovered = $();
+    })
 
     $.fn.closestParent = function(selector) {
         return $(this).parent().closest(selector);
@@ -100,9 +129,6 @@ $(function() {
         return $parent;
     }
 
-    var isDragOn = false;
-    var isResizeOn = false;
-    
     $.fn.getItemFromProp = function(type) {
         if (type === 'text-content') {
             let span = selected.children('span');
@@ -160,14 +186,12 @@ $(function() {
         return $(this);
     }
 
-
-    var editMode = false;
-
     var selected = $();
     $.fn.setSelected = function(isSelected) {
         if (isSelected == true) {
+            $(this).load("hovered");
             $(this).load("opacity-mouseover");
-            $(this).setStyle('border-selected', {'outline': '1px solid'});
+            $(this).setStyle('selected', {'outline': '1px solid'});
             $(this).showProps().focus();
             ($(this).children('span')).attr('contenteditable', 'true').focus();
             jscolor.installByClassName('jscolor');
@@ -177,7 +201,7 @@ $(function() {
             $('.rowxtend, .colxtend').draggable({disabled: true});
             selected = this;            
         } else {
-            $(this).load('border-selected').focusout();
+            $(this).load('selected').focusout();
             $(this).children('span').attr('contenteditable', 'false');
             propertyContainer.hide();
             textContainer.hide();
@@ -201,21 +225,21 @@ $(function() {
         ev.stopPropagation();
     })
 
+    $('.rowxtend, .colxtend').on("mouseover", function(ev){
+        ev.stopPropagation();
+        if (selected.length > 0) return;
+        $(this).setStyle("hovered", {'opacity':'0.5', 'outline': '1px solid blue'});
+    }).on("mouseout", function(ev){
+        ev.stopPropagation();
+        if (selected.length > 0) return;
+        $(this).load("hovered");
+    });
+
     $(document).keydown(function(ev) {
         if (ev.which === 27) selected.setSelected(false);
     })
 
     var isContextMenuOn = false;
-    // handle hover event on .rowxtend or .colxtend and .lastrowxtend, .lastcolxtend
-    $(document).on('mouseover', '.rowxtend, .colxtend', function(ev) {     
-        ev.stopPropagation(); 
-        if (editMode || isResizeOn || isDragOn) return;
-        $(this).setStyle("opacity-mouseover", {"opacity": '0.34', "border": '1px solid blue'});
-    }).on('mouseout', '.rowxtend, .colxtend', function(ev) {     
-        ev.stopPropagation(); 
-        if (editMode || isResizeOn || isDragOn || isContextMenuOn) return;
-        $(this).load("opacity-mouseover");
-    })
 
     //create a wrapper with the target type around the object
     $.fn.createWrapper = function($target) {
@@ -223,12 +247,14 @@ $(function() {
         if ($target.isCol() && $newItem.isRow()) {
             let $col = $.new('div', "colxtend").makeDraggable().makeResizable();
             $col.append($newItem);
-            $newItem.appendLast();
+            $newItem.addDivider(true);
+            $newItem.addDivider(false);
             $newItem = $col;
         } else if ($target.isRow() && $newItem.isCol()) {
             let $row = $.new('div', "rowxtend").makeDraggable().makeResizable();
             $row.append($newItem);
-            $newItem.appendLast();
+            $newItem.addDivider(true);
+            $newItem.addDivider(false);
             $newItem = $row;
         }
         return $newItem;
@@ -244,11 +270,6 @@ $(function() {
         $newItem.insertBefore($container);
         $container.remove();
     }
-    
-    $.getHovered = function(x, y) {
-        let elm = document.elementFromPoint(x, y);
-        return $(elm).closest('[class*=xtend]');
-    }
 
     var hovered = $();
     var tol = 10; //tolerant is 10 px
@@ -263,55 +284,31 @@ $(function() {
                 $(this).data("width", $(this).width()).data("height",$(this).height()); 
                            
                 isDragOn = true;
-                $(this).setStyle('drag-start', {'outline':'1px solid', 'opacity':'0.34'});
-                ui.helper.setStyle('drag-start', {'outline':'1px solid', 'opacity':'0.34'});
             },
             drag: function(ev, ui) {
                 ev.stopPropagation();
                 ui.helper.width($(this).data("width")).height($(this).data("height"));
-
-                let posX = ev.clientX;
-                let posY = ev.clientY;
-                hovered.load('hover-drag');
-                hovered = $.getHovered(posX, posY);
-                if (!hovered.closestParent(".componentx").is($(this).closestParent(".componentx"))) return;
-                if (hovered.length > 0) {
-                    let coor = hovered[0].getBoundingClientRect();
-                    if (posX < coor.left + tol && hovered.isCol()) {
-                        hovered.setStyle('hover-drag', {'border-left': '3px dotted red'});                        
-                    } else if (posY < coor.top + tol && hovered.isRow()) {
-                        hovered.setStyle('hover-drag', {'border-top': '3px dotted red'});
-                    }
-                }
             },
             stop: function(ev, ui) {    
                 isDragOn = false;
                 $(this).load('drag-start');
-                $(this).setSelected(false);
-                
+                $(this).setSelected(false);                
                 let posX = ev.clientX;
                 let posY = ev.clientY;
-
-                hovered.load('hover-drag');
-                hovered = $.getHovered(posX, posY);  
-                
-                if (!hovered.closestParent(".componentx").is($(this).closestParent(".componentx"))) return;
-                if (hovered.length > 0) {
-                    let coor = hovered[0].getBoundingClientRect();
-                    if (posX >= coor.left + tol && hovered.isCol() || posY >= coor.top + tol && hovered.isRow()) {
-                        hovered = $();
-                    }
-                }
-                
                 if (hovered.length === 0) return;
+                hovered.load('divider-hover');
+                hovered.prev().load('element-hover');
+                hovered.next().load('element-hover');
                 if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
                 if ($(this).next().is(hovered)) return;
                 let $container = $(this).getContainerUp();
                 let $containerParent = $container.parent();
                 let $contained = $(this).getContainerDown();
                 
+                $contained.prev().remove();
                 $dragged = $contained.detach().createWrapper(hovered);
                 $dragged.insertBefore(hovered);
+                $dragged.addDivider(true);
                 if (!$container.is($contained)) $container.remove();
                 if ($containerParent.children(".colxtend:not(.ui-draggable-dragging):not(.handler-wrapper-c), .rowxtend:not(.ui-draggable-dragging)").length <= 1)
                     $containerParent.simplify();

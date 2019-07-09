@@ -1,20 +1,20 @@
-
 .page {
     width: 21cm;
     height: 29.7cm;
-    padding-left: 2.5px;
+    padding-right: 9px;
     box-shadow: 0 0 20px rgba(0,0,0,.1);
     background-color: #fff;
 }
 
 .column-left {
-    border-right: 1px solid #0098cf;    
+    border-right: 1px solid #0098cf;
+    padding: 4px;    
+    width: 486px;
 }
 
 .header {
     background-color: #406A8C;
-    padding: 10px 20px 10px 20px
-
+    padding: 32px;
 }
 
 .footer {
@@ -25,14 +25,20 @@
 }
 
 .info-localization {
-    left: 50px;
+    padding-left: 30px;
+    vertical-align: middle;
 }
+
+.info-person {
+    vertical-align: middle;
+}
+
 .first-name-data, .last-name-data {
     color: white;
     font-size: 18pt;
     line-height: 30px;
     font-weight: bold;
-    font-family: 'Lato';
+    font-family: 'Arimo';
 }
 .last-name-data {
     padding-left: 4px;
@@ -42,16 +48,12 @@
     color: #eeeeee;
     font-size: 14pt;
     line-height: 20px;
-    font-family: 'Lato';
-    font-weight: 600;
-}
-
-.info-localization {
-    padding-left: 30px;
+    font-family: 'Arimo';
+    font-weight: 500;
 }
 
 .email-data, .address-data, .phone-data {
-    color: #AFB4B7;
+    color: #e8e9ea;
     font-size: 11pt;
     line-height: 14px;
     font-family: 'Lato';
@@ -62,25 +64,17 @@
 .email-icon .material-icons, .address-icon .material-icons, .phone-icon .material-icons {
     padding-top: 2px;
     font-size: 11pt;
-    color: #AFB4B7;
+    color: #e8e9ea;
 }
 
-.body {
-    padding-top: 5px;
-}
 .column-right {
-    padding-right: 7px;
+    padding: 4px;
+    width: 271px;
 }
 .forwords {
     padding-top: 10px;
     padding-bottom: 5px;
 }
-
-.experiences {
-    padding: 0px;
-    padding-top: 10px;
-}
-
 
 .rowxtend.forwords {
     text-align: center;
@@ -98,14 +92,11 @@
 }
 
 .exp {
-    padding-left: 8px;
-    padding-top: 8px;
+    padding-top: 4px;
 }
 
 .exp-header {
     padding-top: 6px;
-    padding-left: 8px;
-    /*border-bottom: 1px solid #0098cf;*/
 }
 
 .exp-header-data {
