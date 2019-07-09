@@ -6,12 +6,6 @@ $(function() {
         }
     });
     
-    $(".exp-place-data").each(function() {
-        if ($(this).text().indexOf(',') != 0) {
-            $(this).text(',' + $(this).text()); 
-        }
-    })
-
     $("#print").click(function() {
  
         let css =[];

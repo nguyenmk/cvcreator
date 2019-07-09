@@ -10,9 +10,6 @@
   pointer-events: none;
 }
 
-.divider {
-  border: 1px solid;
-}
 .rowxtend, .colxtend {
   left: 0;
   top: 0;
