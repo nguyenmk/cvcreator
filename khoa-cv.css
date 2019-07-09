@@ -2,7 +2,7 @@
 .page {
     width: 21cm;
     height: 29.7cm;
-    padding-right: 7px;
+    padding-left: 2.5px;
     box-shadow: 0 0 20px rgba(0,0,0,.1);
     background-color: #fff;
 }
@@ -13,7 +13,7 @@
 
 .header {
     background-color: #406A8C;
-    padding: 19px 19px 19px 19px
+    padding: 10px 20px 10px 20px
 
 }
 
@@ -21,12 +21,7 @@
     margin-top: 10px;
     color: white;
     background-color: #406A8C;
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
-.info-person {
-    left: 50px;
+    padding: 10px;
 }
 
 .info-localization {
@@ -39,14 +34,22 @@
     font-weight: bold;
     font-family: 'Lato';
 }
+.last-name-data {
+    padding-left: 4px;
+}
 
 .role-title-data {
     color: #eeeeee;
-    font-size: 12pt;
+    font-size: 14pt;
     line-height: 20px;
     font-family: 'Lato';
-    font-weight: 500;
+    font-weight: 600;
 }
+
+.info-localization {
+    padding-left: 30px;
+}
+
 .email-data, .address-data, .phone-data {
     color: #AFB4B7;
     font-size: 11pt;
@@ -62,8 +65,11 @@
     color: #AFB4B7;
 }
 
-.column-right, .column-left {
-    padding-top: 10px;
+.body {
+    padding-top: 5px;
+}
+.column-right {
+    padding-right: 7px;
 }
 .forwords {
     padding-top: 10px;
@@ -75,14 +81,15 @@
     padding-top: 10px;
 }
 
-.component {
-    padding: 0px;
-}
 
+.rowxtend.forwords {
+    text-align: center;
+    padding-left: 15px;
+    padding-right: 15px;
+}
 .forwords-data {
     line-height: normal;
     margin-top: 10px;
-    padding: 12px 14px 5px 14px;
     font-style: italic;
     color: #777;
     font-size: 11pt;
@@ -90,14 +97,14 @@
     font-weight: 500;
 }
 
-
 .exp {
     padding-left: 8px;
-    padding-top: 14pt;
+    padding-top: 8px;
 }
 
 .exp-header {
-    padding: 6px;
+    padding-top: 6px;
+    padding-left: 8px;
     /*border-bottom: 1px solid #0098cf;*/
 }
 
@@ -111,11 +118,15 @@
     word-wrap: break-word;
 }
 
+
 .comp-header {
     padding-top: 3px;
     padding-bottom: 3px;
 }
 
+.footer .comp-header {
+    padding-bottom: 0px;
+}
 .comp-header-data {
     color: #d3f3ff;
     font-size: 13pt;
@@ -134,6 +145,9 @@
     font-family: 'Arimo', 'Sans-serif';
 }
 
+.colxtend.exp-company {
+    direction: rtl;
+}
 .exp-company-data {
     color: #0098cf;
     font-size: 11pt;
@@ -142,13 +156,18 @@
     font-weight: 500;
 }
 
+.rowxtend.comp-item {
+    padding-top: 1px;
+}
 .exp-place-data, .exp-from-data, .exp-to-data, .comp-item-value-data {
     font-size: 10pt;
-    line-height: 10px;
     font-family: 'Titillium Web', 'Monospace';
     font-weight: 500;
 }
 
+.comp-item-value-data {
+    line-height: 15px;
+}
 .comp-item-field-data {
     font-size: 10pt;
     line-height: 10px;

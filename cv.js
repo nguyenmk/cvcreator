@@ -11,41 +11,30 @@ $(function() {
         'background-position': 'field2', 
         'background-repeat': 'field1', 
         'background-size': 'field2',
-        
-        'border-top': 'field3', // (width, style, color)
-        'border-top-left-radius': 'length',
-        'border-top-right-radius': 'length',
-        
         'border-bottom': 'field3',
         'border-bottom-left-radius': 'length',
         'border-bottom-right-radius': 'length',
-        
         'border-left': 'field3',
         'border-right': 'field3',
-                   
-        'margin': 'field4', 
-        'padding': 'field4', 
-        'width': 'length', 
-        'height': 'length', 
-        'left': 'length',  
-        'top': 'length',  
-        'right': 'length',  
-        'bottom': 'length', 
-        
+        'border-top': 'field3', // (width, style, color)
+        'border-top-left-radius': 'length',
+        'border-top-right-radius': 'length',
         'color': 'color', 
-        'opacity': 'scalar', 
-        'white-space': 'length', 
-        'word-spacing': 'length', 
-        'direction': 'field1', 
-        'line-height': 'length',
+        'direction': 'field1',
         'font-family': 'textArray', 
         'font-size': 'length', 
         'font-style': 'field1', 
         'font-weight': 'field1',
+        'line-height': 'length',
+        'margin': 'field4', 
+        'opacity': 'scalar', 
+        'padding': 'field4', 
         'text-align': 'field1', 
         'text-indent': 'field1', 
         'text-shadow': 'mixed', 
         'text-transform': 'mixed',    
+        'white-space': 'length', 
+        'word-spacing': 'length',
     };
 
     // set style and backup the one before it
@@ -133,6 +122,13 @@ $(function() {
             item.css(prop.name, '#' + newValue);
         else 
             item.css(prop.name, newValue);
+    }).on('change', '.property-value', function(event) {
+        let newValue = $(this).val();        
+        let item = selected.getItemFromProp($(this).attr('type'));
+        if ($(this).hasClass('jscolor'))             
+            item.css(prop.name, '#' + newValue);
+        else 
+            item.css(prop.name, newValue);
     }).on('blur', '.property-value', function(event) {
         let item = selected.getItemFromProp($(this).attr('type'));
         prop.editor.text(item.css(prop.name));
@@ -143,7 +139,7 @@ $(function() {
         if (!isNaN(parseInt(field)) || typeof(value) !== "string") return this;
         let li = $.new('li', "list-group-item  list-group-item-primary property");
         let name = $.new('div', "property-name").attr("data-toggle","tooltip").attr("title", field).html(field).attr('type', type);
-        let content = $.new('input', "property-value").attr('value', value);
+        let content = $.new('input', "property-value").attr('value', value).attr('type', type);
         if (field.toLowerCase().indexOf('color') > -1) content = $.new('input', "property-value jscolor").attr('value', value).attr('type', type);
         return $(this).append(li.append(name).append(content));
     }
@@ -349,7 +345,7 @@ $(function() {
     $(".colxtend").each(function() {$(this).makeResizable();});
     
     
-    
+    /*
     $.contextMenu({
         selector: '.colxtend, .rowxtend',
         autoHide: true,
@@ -388,5 +384,6 @@ $(function() {
         }
 
     });
+    */
 });
 
