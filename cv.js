@@ -49,7 +49,7 @@ $(function() {
         return this;
     }
 
-    $.fn.load = function(name) {
+    $.fn.loadBackupStyle = function(name) {
         let data = $(this).data(name);
         for (let css in data) $(this).css(css, data[css]);
         return this;
@@ -68,43 +68,41 @@ $(function() {
         return $(str);
     }
 
-    $.fn.addDivider = function(isBefore = true) {
-        if ($(this).isCol()) {
-            if (isBefore)
-                $('<div class="divider-col" style="display: table-cell; width:4px;padding-left:1px;padding-right:1px"></div>').insertBefore($(this));
-            else
-                $('<div class="divider-col" style="display: table-cell; width:4px;padding-left:1px;padding-right:1px"></div>').insertAfter($(this));
-        } else if ($(this).isRow()) {
-            if (isBefore)
-                $('<div class="divider-row" style="display: block;height:2px;padding-top:1px;padding-bottom:1px"></div>').insertBefore($(this));
-            else 
-                $('<div class="divider-row" style="display: block;height:2px;padding-top:1px;padding-bottom:1px"></div>').insertAfter($(this));
+    $.fn.insert = function(target, mode) {
+        if (mode === 'before') $(this).insertBefore(target);
+        else if (mode === 'after') $(this).insertAfter(target);
+        else if (mode === 'both') {
+            $(this).insertBefore(target).clone(true).insertAfter(target);
         }
         return this;
     }
-    //append divider
-    $('.colxtend, .rowxtend').each(function() { $(this).addDivider(true); });
-    $('.colxtend:last-of-type, .rowxtend:last-of-type').each(function() { $(this).addDivider(false);})
 
-    var editMode = false;
-    var isResizeOn = false;
+    $.fn.addDivider = function(mode) {
+        if ($(this).isCol()) {
+            $('<div class="divider-col" style="display: table-cell; width:4px;padding-left:1px;padding-right:1px"></div>').insert($(this), mode);            
+        } else if ($(this).isRow()) {
+            $('<div class="divider-row" style="display: block;height:2px;padding-top:1px;padding-bottom:1px"></div>').insert($(this), mode);            
+        }
+        return this;
+    }
+
+    //append divider
+    $('.colxtend, .rowxtend').each(function() { $(this).addDivider('before'); });
+    $('.colxtend:last-of-type, .rowxtend:last-of-type').each(function() { $(this).addDivider('after');})
+
     var draggedItem = $();
 
     $('div').on('mouseover', '.divider-row, .divider-col', function(ev) {
         ev.stopPropagation();
-        console.log('mouseover');
         if (!$(this).closestParent('.componentx').is(draggedItem.closestParent('.componentx'))) return;
         if ($(this).next().is(draggedItem) || $(this).prev().is(draggedItem)) return; 
-        console.log('mouseover', 'pass test');
         $(this).setStyle('divider-hover', {'background-color':'red'});
-        //$(this).next().setStyle('element-hover', {'border':'1px solid', 'opacity':'0.34'});
-        //$(this).prev().setStyle('element-hover', {'border':'1px solid', 'opacity':'0.34'});
+        $(this).parent().setStyle("hovered-parent", {'outline': '1px solid blue'});
         hovered = $(this);
     }).on('mouseout', '.divider-row, .divider-col', function(ev) {
         ev.stopPropagation();
-        $(this).load('divider-hover');
-        //$(this).next().load('element-hover');
-        //$(this).prev().load('element-hover');
+        $(this).loadBackupStyle('divider-hover');
+        $(this).parent().loadBackupStyle("hovered-parent");
         hovered = $();
     })
 
@@ -187,29 +185,26 @@ $(function() {
                 textContainer.addProp(field, span.css(field), "text-content");
             }
         }
-        return $(this);
+        return this;
     }
 
     var selected = $();
     $.fn.setSelected = function(isSelected) {
         if (isSelected == true) {
-            $(this).load("hovered");
-            $(this).load("opacity-mouseover");
+            $(this).loadBackupStyle("hovered").loadBackupStyle("opacity-mouseover");
             $(this).setStyle('selected', {'outline': '1px solid'});
             $(this).showProps().focus();
             ($(this).children('span')).attr('contenteditable', 'true').focus();
             jscolor.installByClassName('jscolor');
             propertyContainer.show();
             textContainer.show();
-            editMode = true;
             $('.rowxtend, .colxtend').draggable({disabled: true});
             selected = this;            
         } else {
-            $(this).load('selected').focusout();
+            $(this).loadBackupStyle('selected').focusout();
             $(this).children('span').attr('contenteditable', 'false');
             propertyContainer.hide();
             textContainer.hide();
-            editMode = false;
             $('.rowxtend, .colxtend').draggable({disabled: false});
             selected = $();
         }
@@ -219,12 +214,10 @@ $(function() {
     
     $('div').on("mousedown", ".rowxtend, .colxtend", function(ev){ 
         if (ev.which !== 1) return;
-        if (draggedItem.length > 0 || isResizeOn) return;
+        if (draggedItem.length > 0) return;
         if (!$(this).is(selected)) {      
             selected.setSelected(false);
-            $(this).setSelected(true);
-            
-            
+            $(this).setSelected(true); 
         } 
         ev.stopPropagation();
     })
@@ -232,11 +225,11 @@ $(function() {
     $('div').on("mouseover", '.rowxtend, .colxtend', function(ev){
         ev.stopPropagation();
         if (selected.length > 0) return;
-        $(this).setStyle("hovered", {'opacity':'0.5', 'outline': '1px solid blue'});
+        $(this).setStyle("hovered", {'opacity':'0.5', 'outline': '1px solid blue'});        
     }).on("mouseout", '.rowxtend, .colxtend', function(ev){
         ev.stopPropagation();
         if (selected.length > 0) return;
-        $(this).load("hovered");
+        $(this).loadBackupStyle("hovered");
     });
 
     $(document).keydown(function(ev) {
@@ -255,8 +248,8 @@ $(function() {
             } else if ($newItem.isRow()){
                 let $col = $.new('div', "colxtend").makeDraggable().makeResizable();
                 $col.append($newItem);
-                $newItem.addDivider(true).addDivider(false);
-                return $col;
+                $newItem.addDivider('both');
+                $newItem = $col;
             }
         } else if ($target.hasClass("divider-row")) {
             if ($newItem.children(".rowxtend").length > 0) {
@@ -264,7 +257,7 @@ $(function() {
             } else if ($newItem.isCol()) {
                 let $row = $.new('div', "rowxtend").makeDraggable().makeResizable();
                 $row.append($newItem);
-                $newItem.addDivider(true).addDivider(false);
+                $newItem.addDivider('both');
                 $newItem = $row;
             }
         }
@@ -272,7 +265,8 @@ $(function() {
     }
 
     // simplify an object if it is inside too many levels of containers
-    $.fn.simplify = function() {        
+    $.fn.simplify = function() {   
+        if ($(this).children(".colxtend, .rowxtend").length >1) return this;     
         let $container = $(this).getContainerUp();
         if ($container === null) return;
         if (!$container.parent().isCol() && !$container.parent().isRow()) return;
@@ -280,6 +274,7 @@ $(function() {
         let $newItem = $contained.createWrapper($container);
         $newItem.insertBefore($container);
         $container.remove();
+        return this;
     }
 
     var hovered = $();
@@ -292,22 +287,17 @@ $(function() {
             containment:$(this).closestParent('.componentx'),
             start: function(ev, ui) {
                 ev.stopPropagation();
-                $(this).data("width", $(this).width()).data("height",$(this).height()); 
-                           
+                $(this).data("width", $(this).width()).data("height",$(this).height());                            
                 draggedItem = $(this);
             },
             drag: function(ev, ui) {
                 ev.stopPropagation();
                 ui.helper.width($(this).data("width")).height($(this).data("height"));
             },
-            stop: function(ev, ui) {    
+            stop: function(ev, ui) {
                 draggedItem = $();
-                $(this).load('drag-start');
                 $(this).setSelected(false);
                 if (hovered.length === 0) return;
-                hovered.load('divider-hover');
-                hovered.prev().load('element-hover');
-                hovered.next().load('element-hover');
                 if (jQuery.contains(this, hovered[0]) || $(this).is(hovered)) return;
                 if ($(this).next().is(hovered) || $(this).prev().is(hovered)) return;
                 if (!$(this).closestParent('.componentx').is(hovered.closestParent('.componentx'))) return;
@@ -319,15 +309,14 @@ $(function() {
                 $dragged = $contained.detach().createWrapper(hovered);
                 $dragged.each(function() {
                     $(this).insertBefore(hovered);
-                    $(this).addDivider(true);
+                    $(this).addDivider('before');
                 })
                 
                 if (!$container.is($contained)) {
                     $container.prev().remove();
                     $container.remove();
                 }
-                if ($containerParent.children(".colxtend, .rowxtend").length <= 1)
-                    $containerParent.simplify();
+                $containerParent.simplify();
 
             }
         });
@@ -335,11 +324,11 @@ $(function() {
     }
 
     $(".colxtend, .rowxtend").each(function() {$(this).makeDraggable();});
-    
+        
     $.fn.makeResizable = function() {
         $(this).resizable({     
             handles: "e",
-            //autoHide: true,
+            autoHide: true,
             start: function(event, ui) { 
                 $(this).setStyle('outline-resize', {'outline': '1px solid'});
             },
@@ -348,7 +337,7 @@ $(function() {
             },
             stop: function(event, ui) {
                 console.log("stop resize", $(this).data('outline-resize'));
-                $(this).load('outline-resize');
+                $(this).loadBackupStyle('outline-resize');
                 $(this).setSelected(false);
             }
         });
@@ -356,7 +345,6 @@ $(function() {
     }
 
     $(".colxtend").each(function() {$(this).makeResizable();});
-    
     
     /*
     $.contextMenu({

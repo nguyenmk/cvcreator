@@ -12,6 +12,11 @@
     width: 486px;
 }
 
+.column-right {
+    padding: 4px;
+    width: 271px;
+}
+
 .header {
     background-color: #406A8C;
     padding: 32px;
@@ -67,10 +72,7 @@
     color: #e8e9ea;
 }
 
-.column-right {
-    padding: 4px;
-    width: 271px;
-}
+
 .forwords {
     padding-top: 10px;
     padding-bottom: 5px;
