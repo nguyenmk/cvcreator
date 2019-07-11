@@ -40,7 +40,7 @@ $(function() {
                 $('.page').setStyle('page',{'box-shadow': 'none'});
             },
             onLoadingEnd: function() {
-                $('.page').load('page');
+                $('.page').loadBackupStyle('page');
             }
         })        
 
