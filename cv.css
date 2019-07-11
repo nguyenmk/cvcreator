@@ -13,6 +13,7 @@
 .rowxtend, .colxtend {
   left: 0;
   top: 0;
+  border-collapse: collapse;
 }
 
 #properties-container, #text-container {

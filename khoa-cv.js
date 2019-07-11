@@ -6,6 +6,19 @@ $(function() {
         }
     });
     
+    $('li:contains("Nguyen, M. K.")').each(function() {
+        let html = $(this).html();
+        html = html.replace("Nguyen, M. K.", "<b>Nguyen, M. K.</b>");
+        $(this).html(html);
+    })
+
+    $('li:contains("M. K. Nguyen")').each(function() {
+        let html = $(this).html();
+        html = html.replace("M. K. Nguyen", "<b>M. K. Nguyen</b>");
+        $(this).html(html);
+    })
+
+    
     $("#print").click(function() {
  
         let css =[];

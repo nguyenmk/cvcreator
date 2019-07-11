@@ -93,6 +93,9 @@
     font-weight: 500;
 }
 
+.body-content {
+    padding: 30px;
+}
 .exp {
     padding-top: 4px;
 }
@@ -101,7 +104,7 @@
     padding-top: 6px;
 }
 
-.exp-header-data {
+.exp-header-data, .header-data {
     color: #0098cf;
     font-size: 13pt;
     line-height: 19px;
@@ -130,7 +133,7 @@
     word-wrap: break-word;
 }
 
-.exp-role-data {
+.exp-role-data, .referee-name-data {
     color: #000;
     font-weight: 700;
     font-size: 11pt;
@@ -171,14 +174,19 @@
 .exp-place-data {
     padding-left: 8px;
 }
+
 .exp-description {
     font-family: 'Arimo', 'Sans-serif';
 }
 
-.exp-description-data {
+.exp-description-data, .publications li, .referee-contact-data {
     font-size: 11pt;
     font-family: 'Lato';
     font-weight: 500;
+}
+
+.publications li {
+    margin-top: 5px;
 }
 
 #css-properties tr {
@@ -199,4 +207,13 @@ p {
 
 #container-extra {
     position: absolute;
+}
+
+.referee-group, .publication-group {
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+.referee {
+    margin-top: 5px;
 }
