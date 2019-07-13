@@ -1,8 +1,10 @@
 .page {
-    width: 21cm;
-    height: 29.7cm;
-    padding-right: 9px;
-    box-shadow: 0 0 20px rgba(0,0,0,.1);
+    width: 210mm;
+    height: 282mm;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 0.5cm;
+    box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
     background-color: #fff;
 }
 
@@ -216,4 +218,21 @@ p {
 
 .referee {
     margin-top: 5px;
+}
+
+#toolbar {
+    vertical-align: text-top; 
+    margin-left:20px; 
+    max-width:300px; 
+    width:300px
+}
+
+@media print {
+    body, .page {
+        margin: 0;
+        box-shadow: none;
+    }
+    #toolbar {
+        display: none;
+    }
 }
