@@ -8,6 +8,12 @@
     background-color: #fff;
 }
 
+.ui-resizable-handle {
+    right: 1px;
+}
+.colxtend, .rowxtend {
+    padding-right: 2px;
+}
 .column-left {
     border-right: 1px solid #0098cf;
     padding: 4px;    
@@ -21,7 +27,7 @@
 
 .header {
     background-color: #406A8C;
-    padding: 32px;
+    padding: 27px;
 }
 
 .footer {
@@ -60,7 +66,7 @@
 }
 
 .email-data, .address-data, .phone-data {
-    color: #e8e9ea;
+    color: #ffffff;
     font-size: 11pt;
     line-height: 14px;
     font-family: 'Lato';
@@ -71,7 +77,7 @@
 .email-icon .material-icons, .address-icon .material-icons, .phone-icon .material-icons {
     padding-top: 2px;
     font-size: 11pt;
-    color: #e8e9ea;
+    color: #ffffff;
 }
 
 
@@ -88,8 +94,7 @@
 .forwords-data {
     line-height: normal;
     margin-top: 10px;
-    font-style: italic;
-    color: #777;
+    color: rgb(49, 49, 49);
     font-size: 11pt;
     font-family: 'Lato';
     font-weight: 500;
@@ -227,12 +232,34 @@ p {
     width:300px
 }
 
+.instruction-header {
+    color: #0098cf;
+    font-weight: bold;
+}
+.divider-col {
+    display: table-cell;
+    width:4px;
+    padding-left:1px;
+    padding-right:1px;
+}
+
+.divider-row {
+    display: block;
+    height:2px;
+    padding-top:1px;
+    padding-bottom:1px;
+}
+
 @media print {
     body, .page {
         margin: 0;
         box-shadow: none;
     }
+    .divider-row, .divider-col {
+        visibility: hidden;
+    }
     #toolbar {
         display: none;
     }
+
 }

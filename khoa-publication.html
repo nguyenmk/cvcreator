@@ -14,12 +14,12 @@
 
 <body>
  
-    <div style="width: 1200px; align-items: center; margin:0 auto">
+    <div>
         <table>
             <tr>
                 <td>
                     <div class="page" id="mainContainer">
-                        <div class="rowxtend header">
+                        <div class="header">
                             <div class="colxtend info-person">
                                 <div class="rowxtend">
                                     <div class="colxtend" contenteditable="true"> 
@@ -61,32 +61,6 @@
                         
                         <div class="rowxtend body">                            
                             <div class="rowxtend body-content">
-                                <div class = "rowxtend referee-group">
-                                    <div class = "rowxtend referees">
-                                        <div class="rowxtend referees-header">
-                                            <span class="header-data">Referees</span>
-                                        </div>
-                                        <div class="rowxtend referees-list">
-                                            <div class="rowxtend referee">
-                                                <div class="colxtend referee-name">
-                                                    <span class="referee-name-data">Léonard Jaillet</span>
-                                                </div>
-                                                <div class="colxtend referee-contact">
-                                                    <span class="referee-contact-data"> Starting Research position at INRIA Rhône-Alpes (thesis supervisor),  leonardjaillet@gmail.com </span>
-                                                </div>
-                                            </div>
-                                            <div class="rowxtend referee">
-                                                <div class="colxtend referee-name">
-                                                    <span class="referee-name-data">Stéphane Redon</span>
-                                                </div>
-                                                <div class="colxtend referee-contact">
-                                                    <span class="referee-contact-data"> Co-Founder and CEO at OneAngstrom (thesis supervisor),  stephane.redon@oneangstrom.com </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="rowxtend publication-group">
                                     <div class="rowxtend publication-header">
                                         <span class="header-data"> Publication </span>
@@ -157,11 +131,11 @@
                     </div>
                 </td>
 
-                <td style="vertical-align: text-top; padding:5px; max-width:300px; width:300px">
-                    <div style="position:relative"  id="container-extra">
-                        <div id="toolbar">
+                <td id="toolbar" style="padding-left:40px">
+                    <div style="position:relative"  id="container-extra">                        
+                        <div>
                             <i class="material-icons" id="print" style="cursor:pointer;">
-                                    print
+                                print
                             </i>
                             <input type="file" id="fileDialog" style="display: none" />
                             <i class="material-icons" id="save">
@@ -169,18 +143,32 @@
                             </i>
                             
                             <i class="material-icons" id="load">
-                                folder_open
-                                
+                                folder_open                                
                             </i>
                         </div>
+                        <hr>
                         <div class="row">
                             <div> Container properties </div>
                             <ul id = "properties-container" class="list-group" style="overflow-y: scroll; height:400px">                            
                             </ul>
+                            <hr>
                             <div> Container text </div>
                             <ul id = "text-container" class="list-group" style="overflow-y: scroll; height:400px">                            
                             </ul>
                         </div>
+                        <hr>
+                        <div id="instruction">
+                            <p>Instructions for making your own CV</p>
+                            <ul>
+                                <li> <span class="instruction-header">Component:</span> A component contains text or several components. Hover to see its bounding box </li>
+                                <li> <span class="instruction-header">Edit text:</span> click on the text</li>
+                                <li> <span class="instruction-header">Move component:</span> Click and drag a component, then drop wherever there is a red line </li>
+                                <li> <span class="instruction-header">Resize:</span> Hover at the textbox borders for resize cursor</li>
+                                <li> <span class="instruction-header">Change style:</span> select a textbox, the box and text properties are shown on the right toolbar.</li>
+                                <li> <span class="instruction-header">Deselect:</span> press Esc key</li>
+                            </ul>
+                            <p>Have fun :^)</p>
+                        </div>                        
                     </div>
                 <td>
             </tr>
