@@ -79,9 +79,9 @@ $(function() {
 
     $.fn.addDivider = function(mode) {
         if ($(this).isCol()) {
-            $('<div class="divider-col" style="display: table-cell; width:4px;padding-left:1px;padding-right:1px"></div>').insert($(this), mode);            
+            $('<div class="divider-col"></div>').insert($(this), mode);            
         } else if ($(this).isRow()) {
-            $('<div class="divider-row" style="display: block;height:2px;padding-top:1px;padding-bottom:1px"></div>').insert($(this), mode);            
+            $('<div class="divider-row"></div>').insert($(this), mode);            
         }
         return this;
     }
@@ -218,6 +218,7 @@ $(function() {
         if (!$(this).is(selected)) {      
             selected.setSelected(false);
             $(this).setSelected(true); 
+            $("#instruction").css('display', 'none');
         } 
         ev.stopPropagation();
     })
@@ -233,7 +234,10 @@ $(function() {
     });
 
     $(document).keydown(function(ev) {
-        if (ev.which === 27) selected.setSelected(false);
+        if (ev.which === 27) {
+            selected.setSelected(false);
+            $("#instruction").css('display', 'block');
+        }
     })
 
     var isContextMenuOn = false;
@@ -344,7 +348,7 @@ $(function() {
         return this;
     }
 
-    $(".colxtend").each(function() {$(this).makeResizable();});
+    $(".colxtend, .rowxtend").each(function() {$(this).makeResizable();});
     
     /*
     $.contextMenu({

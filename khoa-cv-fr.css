@@ -8,12 +8,6 @@
     background-color: #fff;
 }
 
-.ui-resizable-handle {
-    right: 1px;
-}
-.colxtend, .rowxtend {
-    padding-right: 2px;
-}
 .column-left {
     border-right: 1px solid #0098cf;
     padding: 4px;    
@@ -27,7 +21,9 @@
 
 .header {
     background-color: #406A8C;
-    padding: 27px;
+    padding: 20px;
+    padding-top: 27px;
+    padding-bottom: 27px;
 }
 
 .footer {
@@ -38,12 +34,14 @@
 }
 
 .info-localization {
-    padding-left: 30px;
+    padding-left: 10px;
     vertical-align: middle;
+    width: 270px;
 }
 
 .info-person {
     vertical-align: middle;
+    width: 480px;
 }
 
 .first-name-data, .last-name-data {
@@ -232,10 +230,6 @@ p {
     width:300px
 }
 
-.instruction-header {
-    color: #0098cf;
-    font-weight: bold;
-}
 .divider-col {
     display: table-cell;
     width:4px;
