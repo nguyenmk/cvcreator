@@ -1,1 +1,4 @@
 .tern-project
+node_modules
+FileSaver.js
+package-lock.json
