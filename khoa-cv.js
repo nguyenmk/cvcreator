@@ -151,10 +151,31 @@ $(function() {
                 $(comp_item_elm).find('.comp-item-value-data').text(comp_item['comp-item-value']);
             }
         }
+
+        //load style
+        let i = 0;
+        $('.rowxtend').each(function() {
+            $(this).attr('style', obj['style']['rowxtend'][i++]);
+        })
+        i = 0;
+        $('.colxtend').each(function() {
+            $(this).attr('style', obj['style']['colxtend'][i++]);
+        })
     }
 
-    $("#save").on('click', function(ev) {  
-        let obj = $.getData();  
+    $("#save").on('click', function(ev) {
+        let style = {};
+        style.rowxtend = []
+        $('.rowxtend').each(function() {            
+            style.rowxtend.push($(this).attr('style'));
+        });
+        style.colxtend = []
+        $('.colxtend').each(function() {
+            style.colxtend.push($(this).attr('style'));
+        });
+
+        let obj = $.getData(); 
+        obj.style = style; 
         let json = JSON.stringify(obj);
         var blob = new Blob([json], {type: "applicaton/json;charset=utf-8"});
         saveAs(blob, 'cv-data.json');    
